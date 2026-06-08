@@ -2,6 +2,8 @@ package com.mindguard
 
 import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
@@ -27,11 +29,34 @@ class MainActivity : ComponentActivity() {
             MindGuardTheme {
                 MindGuardApp(
                     checkAccessibilityEnabled = { isAccessibilityServiceEnabled() },
+                    needsRestrictedSettingsStep = needsRestrictedSettingsStep(),
                     onOpenAccessibilitySettings = {
                         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    },
+                    onOpenAppInfo = {
+                        startActivity(
+                            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                                data = Uri.parse("package:$packageName")
+                            }
+                        )
                     }
                 )
             }
+        }
+    }
+
+    /**
+     * Android 13+ restricts sideloaded apps from enabling accessibility services until
+     * the user explicitly allows "restricted settings" in App Info. This check detects
+     * that scenario so the UI can show the extra step.
+     */
+    private fun needsRestrictedSettingsStep(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return false
+        return try {
+            val source = packageManager.getInstallSourceInfo(packageName)
+            source.installingPackageName != "com.android.vending"
+        } catch (e: Exception) {
+            true  // assume restricted if we can't determine the install source
         }
     }
 
@@ -59,7 +84,9 @@ private enum class Screen { ONBOARDING, PERMISSIONS, HOME, STATS, SETTINGS }
 @Composable
 fun MindGuardApp(
     checkAccessibilityEnabled: () -> Boolean,
+    needsRestrictedSettingsStep: Boolean,
     onOpenAccessibilitySettings: () -> Unit,
+    onOpenAppInfo: () -> Unit,
     viewModel: MainViewModel = koinViewModel()
 ) {
     val onboardingComplete  by viewModel.onboardingComplete.collectAsState()
@@ -107,6 +134,8 @@ fun MindGuardApp(
         )
         Screen.PERMISSIONS -> PermissionsScreen(
             isGranted = accessibilityEnabled,
+            needsRestrictedSettingsStep = needsRestrictedSettingsStep,
+            onOpenAppInfo = onOpenAppInfo,
             onOpenSettings = onOpenAccessibilitySettings,
             onContinue = { currentScreen = Screen.HOME }
         )

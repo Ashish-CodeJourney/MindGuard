@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">MindGuard</string>
-    <string name="accessibility_service_description">MindGuard monitors screen content locally on your device to detect and block Instagram Reels. No data ever leaves your device. No internet connection is used.</string>
+    <string name="accessibility_service_description">MindGuard monitors screen content only inside Instagram, YouTube, TikTok, and Snapchat to detect short-video feeds (Reels, Shorts, Spotlight) and navigate away from them. It reads view resource IDs and visible text exclusively within those apps. No data is collected, stored remotely, or transmitted. All processing happens on-device.</string>
     <string name="tile_focus_label">Focus Mode</string>
 </resources>
