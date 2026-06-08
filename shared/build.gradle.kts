@@ -29,11 +29,6 @@ kotlin {
             implementation(libs.kotlin.stdlib)
             implementation(libs.sqldelight.driver.android)
         }
-
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.kotlin.test)
-        }
     }
 }
 

@@ -28,11 +28,6 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(project(":shared"))
         }
-
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.kotlin.test)
-        }
     }
 }
 
