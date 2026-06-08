@@ -88,6 +88,6 @@ JAVACMD=`which java`
 
 [ -n "$JAVACMD" ] || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH."
 
-JAVA_CMD="$JAVACMD -jar $CLASSPATH"
+JAVA_CMD="$JAVACMD -classpath $CLASSPATH org.gradle.wrapper.GradleWrapperMain"
 
 exec $JAVA_CMD "$@"

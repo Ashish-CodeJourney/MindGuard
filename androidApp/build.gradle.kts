@@ -23,7 +23,6 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.datastore)
-            implementation(libs.androidx.accessibility)
             implementation(libs.koin.android)
             implementation(libs.koin.compose)
             implementation(project(":shared"))
@@ -48,12 +47,20 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.10"
+        kotlinCompilerExtensionVersion = "1.5.11"
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    sourceSets {
+        getByName("main") {
+            manifest.srcFile("src/main/AndroidManifest.xml")
+            java.srcDirs("src/main/kotlin")
+            res.srcDirs("src/main/res")
+        }
     }
 
     buildTypes {

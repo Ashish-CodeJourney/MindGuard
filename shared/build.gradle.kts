@@ -17,7 +17,6 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.kotlin.stdlib)
             implementation(libs.koin.core)
-            implementation(libs.sqldelight.driver.native)
         }
 
         commonTest.dependencies {

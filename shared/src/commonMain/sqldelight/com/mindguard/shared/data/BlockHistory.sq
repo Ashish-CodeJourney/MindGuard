@@ -20,7 +20,7 @@ WHERE packageName = ?
 ORDER BY timestampMillis DESC;
 
 countBlocksToday:
-SELECT COUNT(*) as count
+SELECT COUNT(*) AS blockCount
 FROM block_events
 WHERE timestampMillis >= ?;
 
