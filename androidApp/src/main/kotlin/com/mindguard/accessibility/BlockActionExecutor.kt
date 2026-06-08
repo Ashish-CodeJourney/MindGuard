@@ -11,6 +11,7 @@ class BlockActionExecutor(private val service: AccessibilityService) {
         return when (action) {
             BlockAction.GO_BACK -> goBack()
             BlockAction.GO_HOME_AND_REOPEN_APP -> goHomeAndReopenApp()
+            BlockAction.CLICK_SAFE_TAB -> clickSafeTab()
             BlockAction.NONE -> false
         }
     }
@@ -28,6 +29,31 @@ class BlockActionExecutor(private val service: AccessibilityService) {
             service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
         } catch (e: Exception) {
             false
+        }
+    }
+
+    // Navigates to a safe in-app tab rather than pressing Back, which can close the app.
+    // Tries known Home-feed tab IDs for Instagram; falls back to GLOBAL_ACTION_BACK.
+    private fun clickSafeTab(): Boolean {
+        val root = try { service.rootInActiveWindow } catch (e: Exception) { null }
+            ?: return goBack()
+        return try {
+            val instagramHomeTabs = listOf(
+                "com.instagram.android:id/feed_tab",
+                "com.instagram.android:id/tab_feed"
+            )
+            for (id in instagramHomeTabs) {
+                val nodes = root.findAccessibilityNodeInfosByViewId(id)
+                val tab = nodes.firstOrNull()
+                if (tab != null) {
+                    val clicked = tab.performAction(AccessibilityNodeInfo.ACTION_CLICK)
+                    nodes.forEach { it.recycle() }
+                    if (clicked) return true
+                }
+            }
+            goBack()
+        } finally {
+            root.recycle()
         }
     }
 }

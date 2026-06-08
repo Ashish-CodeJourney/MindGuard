@@ -40,7 +40,7 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -95,7 +95,7 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -108,7 +108,7 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -121,7 +121,7 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     // ── New: stricter detection (clips aliases + single-signal threshold) ────
@@ -141,7 +141,7 @@ class InstagramReelRuleTest {
             createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_swipe_container"))
         )
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -150,7 +150,7 @@ class InstagramReelRuleTest {
             createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_viewer_view_pager"))
         )
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -171,7 +171,7 @@ class InstagramReelRuleTest {
             )
         )
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -226,7 +226,7 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 
     @Test
@@ -256,6 +256,6 @@ class InstagramReelRuleTest {
         val result = rule.evaluate(snapshot)
 
         assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
     }
 }

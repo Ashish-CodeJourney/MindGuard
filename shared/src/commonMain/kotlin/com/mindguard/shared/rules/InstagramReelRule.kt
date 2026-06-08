@@ -37,7 +37,7 @@ class InstagramReelRule : BlockingRule {
             REEL_PLAYER_RESOURCE_IDS.any { id.contains(it, ignoreCase = true) }
         }
         return if (hasPlayerResourceId) {
-            DetectionResult(shouldBlock = true, action = BlockAction.GO_BACK, reason = "Instagram Reel player detected")
+            DetectionResult(shouldBlock = true, action = BlockAction.CLICK_SAFE_TAB, reason = "Instagram Reel player detected")
         } else noBlock()
     }
 

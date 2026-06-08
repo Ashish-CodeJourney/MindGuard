@@ -1,12 +1,12 @@
 package com.mindguard
 
-import android.content.ComponentName
+import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.text.TextUtils
+import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
@@ -62,21 +62,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun isAccessibilityServiceEnabled(): Boolean {
-        val enabled = Settings.Secure.getString(
-            contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
-        ) ?: return false
-        // Android stores the full component name (e.g. "com.mindguard/com.mindguard.accessibility.MindGuardAccessibilityService")
-        // not the dot-shorthand used in AndroidManifest android:name attributes.
-        val target = ComponentName(
-            packageName,
-            "com.mindguard.accessibility.MindGuardAccessibilityService"
-        ).flattenToString()
-        val splitter = TextUtils.SimpleStringSplitter(':')
-        splitter.setString(enabled)
-        while (splitter.hasNext()) {
-            if (splitter.next().equals(target, ignoreCase = true)) return true
-        }
-        return false
+        val am = getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
+        return am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            .any { it.resolveInfo.serviceInfo.name ==
+                "com.mindguard.accessibility.MindGuardAccessibilityService" }
     }
 }
 
