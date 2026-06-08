@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import kotlinx.coroutines.delay
 import com.mindguard.ui.screens.HomeScreen
 import com.mindguard.ui.screens.OnboardingScreen
 import com.mindguard.ui.screens.PermissionsScreen
@@ -114,6 +115,16 @@ fun MindGuardApp(
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    // Active poll every 500ms while waiting for the user to grant permission.
+    // ON_RESUME alone is unreliable when the system commits the accessibility setting
+    // slightly after the activity resumes.
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(500)
+            val current = checkAccessibilityEnabled()
+            if (current != accessibilityEnabled) accessibilityEnabled = current
+        }
     }
 
     val startScreen = when {

@@ -73,7 +73,7 @@ class InstagramReelRuleTest {
     }
 
     @Test
-    fun detectsReelWithReelsTabSignal() {
+    fun doesNotBlockWhenOnlyReelsNavTabPresent() {
         val snapshot = createSnapshot(
             screenText = listOf("Reels"),
             resourceIds = listOf("com.instagram.android:id/reels_tab")
@@ -81,8 +81,8 @@ class InstagramReelRuleTest {
 
         val result = rule.evaluate(snapshot)
 
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
@@ -127,12 +127,12 @@ class InstagramReelRuleTest {
     // ── New: stricter detection (clips aliases + single-signal threshold) ────
 
     @Test
-    fun blocksWhenClipsTabResourceIdPresent() {
+    fun doesNotBlockWhenOnlyClipsNavTabPresent() {
         val result = rule.evaluate(
             createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_tab"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
@@ -145,12 +145,12 @@ class InstagramReelRuleTest {
     }
 
     @Test
-    fun blocksWhenClipsTextIndicatorPresent() {
+    fun doesNotBlockWhenOnlyReelsTextPresentNoPlayerIds() {
         val result = rule.evaluate(
-            createSnapshot(screenText = listOf("Clips", "Following"))
+            createSnapshot(screenText = listOf("Reels", "Following"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test

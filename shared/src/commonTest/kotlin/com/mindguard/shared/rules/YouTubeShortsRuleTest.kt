@@ -36,48 +36,48 @@ class YouTubeShortsRuleTest {
     }
 
     @Test
-    fun blocksWhenShortsTextIndicatorPresent() {
+    fun doesNotBlockWhenOnlyShortsTabTextPresent() {
         val result = rule.evaluate(
             snapshot(screenText = listOf("Shorts"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
-    fun blocksWhenHashtagShortsInText() {
+    fun doesNotBlockWhenOnlyHashtagShortsInText() {
         val result = rule.evaluate(
             snapshot(screenText = listOf("#shorts"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
-    fun blocksWhenShortsDescriptionPresent() {
+    fun doesNotBlockWhenOnlyShortsDescriptionPresent() {
         val result = rule.evaluate(
             snapshot(contentDescriptions = listOf("Shorts video"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
-    fun blocksCaseInsensitively() {
+    fun blocksResourceIdCaseInsensitively() {
         val result = rule.evaluate(
-            snapshot(screenText = listOf("SHORTS"))
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/REEL_WATCH_FRAGMENT_ROOT"))
         )
         assertTrue(result.shouldBlock)
         assertEquals(BlockAction.GO_BACK, result.action)
     }
 
     @Test
-    fun blocksWhenShortsPivotTabPresent() {
+    fun doesNotBlockWhenOnlyShortsNavTabPresent() {
         val result = rule.evaluate(
             snapshot(resourceIds = listOf("com.google.android.youtube:id/shorts_pivot_tab_label"))
         )
-        assertTrue(result.shouldBlock)
-        assertEquals(BlockAction.GO_BACK, result.action)
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
     }
 
     @Test
@@ -143,7 +143,7 @@ class YouTubeShortsRuleTest {
     @Test
     fun includesReasonInDetectionResult() {
         val result = rule.evaluate(
-            snapshot(screenText = listOf("Shorts"))
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/reel_watch_fragment_root"))
         )
         assertTrue(result.shouldBlock)
         assertTrue(result.reason != null)
