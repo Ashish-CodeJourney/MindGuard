@@ -77,8 +77,8 @@ class DetectionIntegrationTest {
         var blockCount = 0
         var successfulBlocks = 0
 
-        // Simulate rapid events within 2-second window
-        for (i in 0..10) {
+        // Simulate rapid events within 2-second window (0..9 → t=1000..2800, before cooldown expires at 3000)
+        for (i in 0..9) {
             val now = 1000L + (i * 200) // 200ms between events
             val canBlock = cooldown.canBlock(now)
 

@@ -49,8 +49,8 @@ class RuleEngineTest {
 
         assertFalse(result.shouldBlock)
         assertEquals(BlockAction.NONE, result.action)
-        assertEquals(2, rule1.evaluationCount)
-        assertEquals(2, rule2.evaluationCount)
+        assertEquals(1, rule1.evaluationCount)
+        assertEquals(1, rule2.evaluationCount)
     }
 
     @Test

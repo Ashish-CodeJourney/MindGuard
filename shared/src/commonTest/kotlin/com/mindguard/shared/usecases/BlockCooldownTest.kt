@@ -115,6 +115,7 @@ class BlockCooldownTest {
         val cooldown = BlockCooldown(cooldownMs = 2000)
 
         var blockCount = 0
+        // 101 events every 10ms from t=1000 to t=2000 — all within the 2s cooldown window
         for (i in 0..100) {
             val now = 1000L + (i * 10)
             if (cooldown.canBlock(now)) {
@@ -123,7 +124,7 @@ class BlockCooldownTest {
             }
         }
 
-        // Should only allow 6 blocks in 1 second period (with 2 second cooldown)
-        assertEquals(6, blockCount)
+        // Only 1 block allowed: second slot opens at t=3000, beyond the loop's range
+        assertEquals(1, blockCount)
     }
 }

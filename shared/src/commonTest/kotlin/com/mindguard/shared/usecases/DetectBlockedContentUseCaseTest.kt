@@ -26,7 +26,7 @@ class DetectBlockedContentUseCaseTest {
     }
 
     @Test
-    fun detects BlockedContent() {
+    fun detectsBlockedContent() {
         val blockingRule = FakeRule(shouldBlock = true)
         val engine = RuleEngine(listOf(blockingRule))
         val useCase = DetectBlockedContentUseCase(engine)
