@@ -14,11 +14,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Calendar
 
 private fun formatDuration(seconds: Long): String = when {
     seconds < 60   -> "${seconds}s"
     seconds < 3600 -> "${seconds / 60}m ${seconds % 60}s"
     else           -> "${seconds / 3600}h ${(seconds % 3600) / 60}m"
+}
+
+private fun formatPauseTime(pauseUntilMs: Long): String {
+    val cal = Calendar.getInstance()
+    cal.timeInMillis = pauseUntilMs
+    return "%02d:%02d".format(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
 }
 
 @Composable
@@ -27,12 +34,15 @@ fun HomeScreen(
     blockCount: Long,
     attemptCount: Long,
     currentStreak: Long,
+    pauseUntilMs: Long = 0L,
     onToggleProtection: (Boolean) -> Unit,
+    onResumeFromPause: () -> Unit = {},
     onViewStats: () -> Unit,
     onOpenSettings: () -> Unit
 ) {
     val timeSavedSeconds = blockCount * 90L
     val deflectedPct     = if (attemptCount > 0) (blockCount * 100 / attemptCount) else 0L
+    val isPaused = pauseUntilMs > 0L && System.currentTimeMillis() < pauseUntilMs
 
     Column(
         modifier = Modifier
@@ -75,40 +85,63 @@ fun HomeScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Protection card
-        val cardColor = if (protectionEnabled) Color(0xFF1B5E20) else Color(0xFF4A1942)
+        val cardColor = when {
+            isPaused          -> Color(0xFF7A4F00)
+            protectionEnabled -> Color(0xFF1B5E20)
+            else              -> Color(0xFF4A1942)
+        }
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = cardColor)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    Text(
-                        if (protectionEnabled) "🛡️ Active" else "⏸️ Paused",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Text(
-                        if (protectionEnabled) "Reels & Shorts are being blocked" else "Protection is off",
-                        fontSize = 13.sp,
-                        color = Color.White.copy(alpha = 0.8f)
+            Column(modifier = Modifier.fillMaxWidth().padding(20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            when {
+                                isPaused          -> "⏸️ Paused"
+                                protectionEnabled -> "🛡️ Active"
+                                else              -> "🔴 Off"
+                            },
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            when {
+                                isPaused          -> "Resumes at ${formatPauseTime(pauseUntilMs)}"
+                                protectionEnabled -> "Reels & Shorts are being blocked"
+                                else              -> "Protection is off"
+                            },
+                            fontSize = 13.sp,
+                            color = Color.White.copy(alpha = 0.8f)
+                        )
+                    }
+                    Switch(
+                        checked = protectionEnabled && !isPaused,
+                        onCheckedChange = {
+                            if (isPaused) onResumeFromPause() else onToggleProtection(it)
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = Color.White,
+                            checkedTrackColor = Color.White.copy(alpha = 0.4f)
+                        )
                     )
                 }
-                Switch(
-                    checked = protectionEnabled,
-                    onCheckedChange = onToggleProtection,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color.White.copy(alpha = 0.4f)
-                    )
-                )
+                if (isPaused) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextButton(
+                        onClick = onResumeFromPause,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text("Resume Now", color = Color.White, fontSize = 13.sp)
+                    }
+                }
             }
         }
 

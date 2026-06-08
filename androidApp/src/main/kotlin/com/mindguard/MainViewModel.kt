@@ -55,6 +55,9 @@ class MainViewModel(private val store: SettingsDataStore) : ViewModel() {
     val focusEndHour: StateFlow<Int> = store.focusEndHourFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 17)
 
+    val pauseUntil: StateFlow<Long> = store.pauseUntilFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+
     init {
         viewModelScope.launch { store.resetDailyCountsIfNeeded() }
     }
@@ -74,5 +77,13 @@ class MainViewModel(private val store: SettingsDataStore) : ViewModel() {
 
     fun setFocusSchedule(enabled: Boolean, startHour: Int, endHour: Int) {
         viewModelScope.launch { store.setFocusSchedule(enabled, startHour, endHour) }
+    }
+
+    fun pauseProtection(durationMs: Long) {
+        viewModelScope.launch { store.pauseProtection(durationMs) }
+    }
+
+    fun resumeFromPause() {
+        viewModelScope.launch { store.resumeFromPause() }
     }
 }

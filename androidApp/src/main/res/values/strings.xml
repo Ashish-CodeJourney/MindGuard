@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">MindGuard</string>
     <string name="accessibility_service_description">MindGuard monitors screen content locally on your device to detect and block Instagram Reels. No data ever leaves your device. No internet connection is used.</string>
+    <string name="tile_focus_label">Focus Mode</string>
 </resources>

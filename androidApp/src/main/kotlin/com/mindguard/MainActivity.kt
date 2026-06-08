@@ -1,5 +1,6 @@
 package com.mindguard
 
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
@@ -38,14 +39,16 @@ class MainActivity : ComponentActivity() {
         val enabled = Settings.Secure.getString(
             contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
         ) ?: return false
+        // Android stores the full component name (e.g. "com.mindguard/com.mindguard.accessibility.MindGuardAccessibilityService")
+        // not the dot-shorthand used in AndroidManifest android:name attributes.
+        val target = ComponentName(
+            packageName,
+            "com.mindguard.accessibility.MindGuardAccessibilityService"
+        ).flattenToString()
         val splitter = TextUtils.SimpleStringSplitter(':')
         splitter.setString(enabled)
         while (splitter.hasNext()) {
-            if (splitter.next().equals(
-                    "$packageName/.accessibility.MindGuardAccessibilityService",
-                    ignoreCase = true
-                )
-            ) return true
+            if (splitter.next().equals(target, ignoreCase = true)) return true
         }
         return false
     }
@@ -74,6 +77,7 @@ fun MindGuardApp(
     val focusScheduleEnabled by viewModel.focusScheduleEnabled.collectAsState()
     val focusStartHour      by viewModel.focusStartHour.collectAsState()
     val focusEndHour        by viewModel.focusEndHour.collectAsState()
+    val pauseUntil          by viewModel.pauseUntil.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var accessibilityEnabled by remember { mutableStateOf(checkAccessibilityEnabled()) }
@@ -111,7 +115,9 @@ fun MindGuardApp(
             blockCount         = blockCountToday,
             attemptCount       = attemptCountToday,
             currentStreak      = currentStreak,
+            pauseUntilMs       = pauseUntil,
             onToggleProtection = viewModel::toggleProtection,
+            onResumeFromPause  = viewModel::resumeFromPause,
             onViewStats        = { currentScreen = Screen.STATS },
             onOpenSettings     = { currentScreen = Screen.SETTINGS }
         )

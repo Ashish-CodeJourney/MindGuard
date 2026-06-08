@@ -48,6 +48,9 @@ class SettingsDataStore(private val context: Context) {
         private val FOCUS_START_HOUR      = intPreferencesKey("focus_start_hour")
         private val FOCUS_END_HOUR        = intPreferencesKey("focus_end_hour")
 
+        // Pause-until epoch millis (0 = not paused)
+        private val PAUSE_UNTIL_MS        = longPreferencesKey("pause_until_ms")
+
         // Package names
         const val INSTAGRAM_PKG = "com.instagram.android"
         const val YOUTUBE_PKG   = "com.google.android.youtube"
@@ -81,6 +84,9 @@ class SettingsDataStore(private val context: Context) {
     val focusScheduleEnabledFlow: Flow<Boolean> = context.dataStore.data.map { it[FOCUS_SCHEDULE_ON] ?: false }
     val focusStartHourFlow: Flow<Int>            = context.dataStore.data.map { it[FOCUS_START_HOUR] ?: 9 }
     val focusEndHourFlow: Flow<Int>              = context.dataStore.data.map { it[FOCUS_END_HOUR] ?: 17 }
+
+    // ── Pause-until flow ─────────────────────────────────────────────────────
+    val pauseUntilFlow: Flow<Long> = context.dataStore.data.map { it[PAUSE_UNTIL_MS] ?: 0L }
 
     // ── Enabled packages flow (combines all app toggles) ─────────────────────
     val enabledPackagesFlow: Flow<Set<String>> = combine(
@@ -121,6 +127,14 @@ class SettingsDataStore(private val context: Context) {
 
     suspend fun setSnapchatEnabled(enabled: Boolean) {
         context.dataStore.edit { it[SNAPCHAT_ENABLED] = enabled }
+    }
+
+    suspend fun pauseProtection(durationMs: Long) {
+        context.dataStore.edit { it[PAUSE_UNTIL_MS] = System.currentTimeMillis() + durationMs }
+    }
+
+    suspend fun resumeFromPause() {
+        context.dataStore.edit { it[PAUSE_UNTIL_MS] = 0L }
     }
 
     suspend fun setFocusSchedule(enabled: Boolean, startHour: Int, endHour: Int) {
