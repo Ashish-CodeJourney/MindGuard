@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.mindguard.ui.screens.HomeScreen
 import com.mindguard.ui.screens.OnboardingScreen
 import com.mindguard.ui.screens.PermissionsScreen
+import com.mindguard.ui.screens.SettingsScreen
 import com.mindguard.ui.screens.StatsScreen
 import com.mindguard.ui.theme.MindGuardTheme
 import org.koin.androidx.compose.koinViewModel
@@ -50,7 +51,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class Screen { ONBOARDING, PERMISSIONS, HOME, STATS }
+private enum class Screen { ONBOARDING, PERMISSIONS, HOME, STATS, SETTINGS }
 
 @Composable
 fun MindGuardApp(
@@ -64,6 +65,15 @@ fun MindGuardApp(
     val attemptCountToday   by viewModel.attemptCountToday.collectAsState()
     val totalBlocks         by viewModel.totalBlocks.collectAsState()
     val totalAttempts       by viewModel.totalAttempts.collectAsState()
+    val currentStreak       by viewModel.currentStreak.collectAsState()
+    val bestStreak          by viewModel.bestStreak.collectAsState()
+    val instagramEnabled    by viewModel.instagramEnabled.collectAsState()
+    val youtubeEnabled      by viewModel.youtubeEnabled.collectAsState()
+    val tiktokEnabled       by viewModel.tiktokEnabled.collectAsState()
+    val snapchatEnabled     by viewModel.snapchatEnabled.collectAsState()
+    val focusScheduleEnabled by viewModel.focusScheduleEnabled.collectAsState()
+    val focusStartHour      by viewModel.focusStartHour.collectAsState()
+    val focusEndHour        by viewModel.focusEndHour.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var accessibilityEnabled by remember { mutableStateOf(checkAccessibilityEnabled()) }
@@ -76,9 +86,9 @@ fun MindGuardApp(
     }
 
     val startScreen = when {
-        !onboardingComplete    -> Screen.ONBOARDING
-        !accessibilityEnabled  -> Screen.PERMISSIONS
-        else                   -> Screen.HOME
+        !onboardingComplete   -> Screen.ONBOARDING
+        !accessibilityEnabled -> Screen.PERMISSIONS
+        else                  -> Screen.HOME
     }
     var currentScreen by remember(onboardingComplete, accessibilityEnabled) {
         mutableStateOf(startScreen)
@@ -97,18 +107,39 @@ fun MindGuardApp(
             onContinue = { currentScreen = Screen.HOME }
         )
         Screen.HOME -> HomeScreen(
-            protectionEnabled = protectionEnabled,
-            blockCount        = blockCountToday,
-            attemptCount      = attemptCountToday,
+            protectionEnabled  = protectionEnabled,
+            blockCount         = blockCountToday,
+            attemptCount       = attemptCountToday,
+            currentStreak      = currentStreak,
             onToggleProtection = viewModel::toggleProtection,
-            onViewStats = { currentScreen = Screen.STATS }
+            onViewStats        = { currentScreen = Screen.STATS },
+            onOpenSettings     = { currentScreen = Screen.SETTINGS }
         )
         Screen.STATS -> StatsScreen(
             blockCountToday   = blockCountToday,
             attemptCountToday = attemptCountToday,
             totalBlocks       = totalBlocks,
             totalAttempts     = totalAttempts,
-            onBack = { currentScreen = Screen.HOME }
+            currentStreak     = currentStreak,
+            bestStreak        = bestStreak,
+            onBack            = { currentScreen = Screen.HOME }
+        )
+        Screen.SETTINGS -> SettingsScreen(
+            instagramEnabled     = instagramEnabled,
+            youtubeEnabled       = youtubeEnabled,
+            tiktokEnabled        = tiktokEnabled,
+            snapchatEnabled      = snapchatEnabled,
+            focusScheduleEnabled = focusScheduleEnabled,
+            focusStartHour       = focusStartHour,
+            focusEndHour         = focusEndHour,
+            currentStreak        = currentStreak,
+            bestStreak           = bestStreak,
+            onInstagramToggle    = viewModel::setInstagramEnabled,
+            onYoutubeToggle      = viewModel::setYoutubeEnabled,
+            onTiktokToggle       = viewModel::setTiktokEnabled,
+            onSnapchatToggle     = viewModel::setSnapchatEnabled,
+            onFocusScheduleChange = viewModel::setFocusSchedule,
+            onBack               = { currentScreen = Screen.HOME }
         )
     }
 }

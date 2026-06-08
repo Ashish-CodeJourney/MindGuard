@@ -1,7 +1,9 @@
 package com.mindguard.di
 
+import com.mindguard.MainViewModel
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 
 val uiModule = module {
-    // ViewModel factories and UI-related dependencies will be added here
+    viewModel { MainViewModel(get()) }
 }
