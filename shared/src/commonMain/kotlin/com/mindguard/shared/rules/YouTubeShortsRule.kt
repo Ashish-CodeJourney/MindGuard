@@ -14,7 +14,8 @@ class YouTubeShortsRule : BlockingRule {
         // (home-feed shelf items) are intentionally excluded — they appear on the home
         // screen and would block all of YouTube.
         val SHORTS_PLAYER_RESOURCE_IDS = setOf(
-            "reel_watch_fragment_root",
+            "reel_watch_fragment_root",      // confirmed primary Shorts player root (multiple sources)
+            "reel_progress_bar",             // confirmed unique to Shorts player (Shorts-Blocker)
             "shorts_video_header",
             "shorts_container",
             "shorts_vertical_feed_container",

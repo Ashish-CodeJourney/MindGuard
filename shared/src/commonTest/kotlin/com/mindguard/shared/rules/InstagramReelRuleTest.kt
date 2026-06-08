@@ -145,6 +145,15 @@ class InstagramReelRuleTest {
     }
 
     @Test
+    fun blocksWhenClipsViewerViewPagerPresent() {
+        val result = rule.evaluate(
+            createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_viewer_view_pager"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
     fun doesNotBlockWhenOnlyReelsTextPresentNoPlayerIds() {
         val result = rule.evaluate(
             createSnapshot(screenText = listOf("Reels", "Following"))

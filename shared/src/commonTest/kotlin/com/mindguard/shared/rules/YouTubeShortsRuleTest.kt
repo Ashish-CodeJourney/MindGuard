@@ -90,6 +90,15 @@ class YouTubeShortsRuleTest {
     }
 
     @Test
+    fun blocksWhenReelProgressBarPresent() {
+        val result = rule.evaluate(
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/reel_progress_bar"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
     fun blocksWhenReelPlayerPageContainerPresent() {
         val result = rule.evaluate(
             snapshot(resourceIds = listOf("com.google.android.youtube:id/reel_player_page_container"))

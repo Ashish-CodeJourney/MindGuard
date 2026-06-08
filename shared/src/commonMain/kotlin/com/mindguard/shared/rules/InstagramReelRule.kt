@@ -13,6 +13,7 @@ class InstagramReelRule : BlockingRule {
         // Navigation-tab IDs (reels_tab, clips_tab) are intentionally excluded because
         // they appear on every Instagram screen and would cause false-positive blocks.
         val REEL_PLAYER_RESOURCE_IDS = setOf(
+            "clips_viewer_view_pager",  // confirmed primary Reels ViewPager (multiple open-source apps)
             "reel_pager",
             "reel_play_button",
             "reel_component",
