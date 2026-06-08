@@ -8,25 +8,27 @@ class InstagramReelRule : BlockingRule {
 
     private companion object {
         const val INSTAGRAM_PACKAGE = "com.instagram.android"
-        const val MIN_SIGNAL_SCORE = 2
 
+        // Any one of these resource IDs on screen → block immediately
         val REEL_RESOURCE_IDS = setOf(
             "reel_pager",
             "reels_tab",
             "reel_play_button",
-            "reel_component"
+            "reel_component",
+            "clips_tab",
+            "clips_swipe_container",
+            "reels_viewer",
+            "reel_feed_recycler_view",
+            "ig_reels_player_container"
         )
 
-        val REEL_TEXT_INDICATORS = setOf(
-            "reels"
-        )
+        // "clips" is Instagram's alternate name for Reels in some regions/builds
+        val REEL_TEXT_INDICATORS = setOf("reels", "clips")
 
-        val REEL_DESCRIPTION_KEYWORDS = setOf(
-            "reel",
-            "video reel"
-        )
+        val REEL_DESCRIPTION_KEYWORDS = setOf("reel", "video reel")
 
-        val FEED_BLOCKLIST_RESOURCE_IDS = setOf(
+        // If ANY of these are the primary container, user is on the regular feed — never block
+        val FEED_SCREEN_RESOURCE_IDS = setOf(
             "feed_pager",
             "feed_container",
             "stories_container"
@@ -34,78 +36,32 @@ class InstagramReelRule : BlockingRule {
     }
 
     override fun evaluate(snapshot: ScreenSnapshot): DetectionResult {
-        if (snapshot.packageName != INSTAGRAM_PACKAGE) {
-            return noBlock()
-        }
+        if (snapshot.packageName != INSTAGRAM_PACKAGE) return noBlock()
 
-        val signals = countSignals(snapshot)
+        // Explicit feed-screen guard: if the main feed container is present, never block —
+        // even if reel thumbnails appear as shelf items in the feed.
+        if (isFeedScreen(snapshot.resourceIds)) return noBlock()
 
-        return if (signals >= MIN_SIGNAL_SCORE) {
+        val signals = countPositiveSignals(snapshot)
+        return if (signals >= 1) {
             DetectionResult(
                 shouldBlock = true,
                 action = BlockAction.GO_BACK,
                 reason = "Instagram Reel detected ($signals signals)"
             )
-        } else {
-            noBlock()
-        }
+        } else noBlock()
     }
 
-    private fun countSignals(snapshot: ScreenSnapshot): Int {
+    private fun isFeedScreen(resourceIds: List<String>): Boolean =
+        resourceIds.any { id -> FEED_SCREEN_RESOURCE_IDS.any { id.contains(it, ignoreCase = true) } }
+
+    private fun countPositiveSignals(snapshot: ScreenSnapshot): Int {
         var score = 0
-
-        if (hasReelTextIndicator(snapshot.screenText)) {
-            score++
-        }
-
-        if (hasReelResourceId(snapshot.resourceIds)) {
-            score++
-        }
-
-        if (hasReelDescription(snapshot.contentDescriptions)) {
-            score++
-        }
-
-        if (isNotFeedScreen(snapshot.resourceIds)) {
-            score++
-        }
-
+        if (snapshot.screenText.any { t -> REEL_TEXT_INDICATORS.any { t.lowercase().contains(it) } }) score++
+        if (snapshot.resourceIds.any { id -> REEL_RESOURCE_IDS.any { id.contains(it, ignoreCase = true) } }) score++
+        if (snapshot.contentDescriptions.any { d -> REEL_DESCRIPTION_KEYWORDS.any { d.lowercase().contains(it) } }) score++
         return score
     }
 
-    private fun hasReelTextIndicator(screenText: List<String>): Boolean {
-        return screenText.any { text ->
-            REEL_TEXT_INDICATORS.any { indicator ->
-                text.lowercase().contains(indicator)
-            }
-        }
-    }
-
-    private fun hasReelResourceId(resourceIds: List<String>): Boolean {
-        return resourceIds.any { id ->
-            REEL_RESOURCE_IDS.any { reelId ->
-                id.contains(reelId, ignoreCase = true)
-            }
-        }
-    }
-
-    private fun hasReelDescription(descriptions: List<String>): Boolean {
-        return descriptions.any { desc ->
-            REEL_DESCRIPTION_KEYWORDS.any { keyword ->
-                desc.lowercase().contains(keyword)
-            }
-        }
-    }
-
-    private fun isNotFeedScreen(resourceIds: List<String>): Boolean {
-        return !resourceIds.any { id ->
-            FEED_BLOCKLIST_RESOURCE_IDS.any { blocklist ->
-                id.contains(blocklist, ignoreCase = true)
-            }
-        }
-    }
-
-    private fun noBlock(): DetectionResult {
-        return DetectionResult(shouldBlock = false, action = BlockAction.NONE, reason = null)
-    }
+    private fun noBlock() = DetectionResult(shouldBlock = false, action = BlockAction.NONE, reason = null)
 }

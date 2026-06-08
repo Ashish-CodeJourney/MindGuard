@@ -15,7 +15,10 @@ class YouTubeShortsRule : BlockingRule {
             "shorts_video_header",
             "shorts_shelf_header_endpoint",
             "shorts_container",
-            "reel_shelf_item"
+            "reel_shelf_item",
+            "shorts_pivot_tab_label",
+            "shorts_vertical_feed_container",
+            "reel_player_page_container"
         )
 
         val SHORTS_TEXT_INDICATORS = setOf("shorts", "#shorts")

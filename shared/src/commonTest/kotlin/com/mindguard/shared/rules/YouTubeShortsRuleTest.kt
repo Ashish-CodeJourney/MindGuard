@@ -72,6 +72,33 @@ class YouTubeShortsRuleTest {
     }
 
     @Test
+    fun blocksWhenShortsPivotTabPresent() {
+        val result = rule.evaluate(
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/shorts_pivot_tab_label"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenShortsVerticalFeedContainerPresent() {
+        val result = rule.evaluate(
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/shorts_vertical_feed_container"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenReelPlayerPageContainerPresent() {
+        val result = rule.evaluate(
+            snapshot(resourceIds = listOf("com.google.android.youtube:id/reel_player_page_container"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
     fun blocksWhenShortsShelfResourceIdPresent() {
         val result = rule.evaluate(
             snapshot(resourceIds = listOf("com.google.android.youtube:id/shorts_video_header"))

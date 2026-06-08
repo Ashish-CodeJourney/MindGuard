@@ -124,6 +124,62 @@ class InstagramReelRuleTest {
         assertEquals(BlockAction.GO_BACK, result.action)
     }
 
+    // ── New: stricter detection (clips aliases + single-signal threshold) ────
+
+    @Test
+    fun blocksWhenClipsTabResourceIdPresent() {
+        val result = rule.evaluate(
+            createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_tab"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenClipsSwipeContainerPresent() {
+        val result = rule.evaluate(
+            createSnapshot(resourceIds = listOf("com.instagram.android:id/clips_swipe_container"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenClipsTextIndicatorPresent() {
+        val result = rule.evaluate(
+            createSnapshot(screenText = listOf("Clips", "Following"))
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksOnSingleReelResourceIdWithoutTextOrDescription() {
+        val result = rule.evaluate(
+            createSnapshot(
+                screenText = listOf("Like", "Comment", "Share"),
+                resourceIds = listOf("com.instagram.android:id/reel_pager")
+            )
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun doesNotBlockWhenOnFeedEvenIfReelTextPresent() {
+        val result = rule.evaluate(
+            createSnapshot(
+                screenText = listOf("Reels"),
+                resourceIds = listOf(
+                    "com.instagram.android:id/feed_pager",
+                    "com.instagram.android:id/reel_pager"
+                )
+            )
+        )
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
+    }
+
     @Test
     fun doesNotBlockWithOnlyOneWeakSignal() {
         val snapshot = createSnapshot(
