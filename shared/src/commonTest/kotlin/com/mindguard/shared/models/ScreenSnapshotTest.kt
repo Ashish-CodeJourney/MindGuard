@@ -78,6 +78,38 @@ class ScreenSnapshotTest {
     }
 
     @Test
+    fun rejectsBlankOnlyPackageName() {
+        assertFailsWith<IllegalArgumentException> {
+            ScreenSnapshot(
+                packageName = "   ",
+                screenText = emptyList(),
+                contentDescriptions = emptyList(),
+                resourceIds = emptyList(),
+                timestampMillis = 1000L
+            )
+        }
+    }
+
+    @Test
+    fun equalSnapshotsAreEqual() {
+        val a = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = listOf("Reels"),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L
+        )
+        val b = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = listOf("Reels"),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L
+        )
+        assertEquals(a, b)
+    }
+
+    @Test
     fun snapshotsAreImmutable() {
         val snapshot = ScreenSnapshot(
             packageName = "com.instagram.android",
