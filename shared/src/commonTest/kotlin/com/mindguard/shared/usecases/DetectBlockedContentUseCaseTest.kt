@@ -117,11 +117,24 @@ class DetectBlockedContentUseCaseTest {
         val logCapture = mutableListOf<String>()
         val useCase = DetectBlockedContentUseCase(engine) { message -> logCapture.add(message) }
 
-        val snapshot = createSnapshot()
+        val snapshot = createSnapshot(packageName = "com.instagram.android")
         useCase.execute(snapshot)
 
         assertTrue(logCapture.isNotEmpty())
-        assertFalse(logCapture[0].contains("null"))
+        assertFalse(logCapture[0].contains("null"), "Log must not contain literal 'null'")
+        assertTrue(logCapture[0].contains("com.instagram.android"), "Log must still include package name")
+    }
+
+    @Test
+    fun doesNotLogWhenNothingIsBlocked() {
+        val blockingRule = FakeRule(shouldBlock = false)
+        val engine = RuleEngine(listOf(blockingRule))
+        val logCapture = mutableListOf<String>()
+        val useCase = DetectBlockedContentUseCase(engine) { message -> logCapture.add(message) }
+
+        useCase.execute(createSnapshot())
+
+        assertTrue(logCapture.isEmpty(), "Logger must not be called when no block occurs")
     }
 
     private class FakeRule(

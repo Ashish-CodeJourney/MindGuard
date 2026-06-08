@@ -1,29 +1,32 @@
 package com.mindguard.shared.models
 
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 class SupportedAppTest {
 
     @Test
-    fun definesSupportedApps() {
-        val apps = SupportedApp.values()
-        assertTrue(apps.isNotEmpty(), "SupportedApp must have at least one value")
-
-        val appNames = apps.map { it.name }
-        assertTrue(appNames.contains("INSTAGRAM"), "Must have INSTAGRAM app")
+    fun definesExactlyFourSupportedApps() {
+        assertEquals(4, SupportedApp.values().size, "SupportedApp must define exactly 4 values")
     }
 
     @Test
     fun instagramAppExists() {
-        val instagram = SupportedApp.INSTAGRAM
-        assertTrue(instagram.name == "INSTAGRAM")
+        assertEquals("INSTAGRAM", SupportedApp.INSTAGRAM.name)
     }
 
     @Test
-    fun futureAppsCanBeAdded() {
-        val apps = SupportedApp.values()
-        // MVP only requires INSTAGRAM, but enum should be extensible
-        assertTrue(apps.size >= 1, "Must support at least INSTAGRAM")
+    fun youtubeAppExists() {
+        assertEquals("YOUTUBE", SupportedApp.YOUTUBE.name)
+    }
+
+    @Test
+    fun snapchatAppExists() {
+        assertEquals("SNAPCHAT", SupportedApp.SNAPCHAT.name)
+    }
+
+    @Test
+    fun tiktokAppExists() {
+        assertEquals("TIKTOK", SupportedApp.TIKTOK.name)
     }
 }

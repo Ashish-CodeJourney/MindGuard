@@ -70,4 +70,28 @@ class DetectionResultTest {
         assertTrue(result.shouldBlock)
         assertTrue(result.action != BlockAction.NONE)
     }
+
+    @Test
+    fun equalResultsAreEqual() {
+        val a = DetectionResult(shouldBlock = true, action = BlockAction.GO_BACK, reason = "Reel")
+        val b = DetectionResult(shouldBlock = true, action = BlockAction.GO_BACK, reason = "Reel")
+        assertEquals(a, b)
+    }
+
+    @Test
+    fun copyWithDifferentReasonProducesDistinctResult() {
+        val original = DetectionResult(shouldBlock = true, action = BlockAction.CLICK_SAFE_TAB, reason = "original")
+        val copy = original.copy(reason = "modified")
+        assertEquals("original", original.reason)
+        assertEquals("modified", copy.reason)
+        assertEquals(original.shouldBlock, copy.shouldBlock)
+        assertEquals(original.action, copy.action)
+    }
+
+    @Test
+    fun clickSafeTabResultIsRepresentable() {
+        val result = DetectionResult(shouldBlock = true, action = BlockAction.CLICK_SAFE_TAB, reason = "Instagram Reel")
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
+    }
 }

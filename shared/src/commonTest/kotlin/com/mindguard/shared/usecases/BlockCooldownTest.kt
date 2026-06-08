@@ -100,6 +100,22 @@ class BlockCooldownTest {
     }
 
     @Test
+    fun zeroCooldownAlwaysAllowsBlock() {
+        val cooldown = BlockCooldown(cooldownMs = 0)
+        cooldown.recordBlock(1000L)
+        assertTrue(cooldown.canBlock(1000L), "0ms cooldown means every call is allowed immediately")
+    }
+
+    @Test
+    fun veryLargeTimestampIsHandledCorrectly() {
+        val cooldown = BlockCooldown(cooldownMs = 1000)
+        val bigTime = 9_000_000_000_000L
+        cooldown.recordBlock(bigTime)
+        assertFalse(cooldown.canBlock(bigTime + 999))
+        assertTrue(cooldown.canBlock(bigTime + 1000))
+    }
+
+    @Test
     fun cooldownWindowExactBoundary() {
         val cooldown = BlockCooldown(cooldownMs = 2000)
 

@@ -1,36 +1,33 @@
 package com.mindguard.shared.models
 
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class BlockActionTest {
 
     @Test
-    fun definesAllBlockActions() {
-        val actions = BlockAction.values()
-        assertTrue(actions.isNotEmpty(), "BlockAction must have at least one value")
-
-        val actionNames = actions.map { it.name }
-        assertTrue(actionNames.contains("NONE"), "Must have NONE action")
-        assertTrue(actionNames.contains("GO_BACK"), "Must have GO_BACK action")
-        assertTrue(actionNames.contains("GO_HOME_AND_REOPEN_APP"), "Must have GO_HOME_AND_REOPEN_APP action")
+    fun definesExactlyFourBlockActions() {
+        assertEquals(4, BlockAction.values().size, "BlockAction must define exactly 4 values")
     }
 
     @Test
     fun noneActionExists() {
-        val none = BlockAction.NONE
-        assertTrue(none.name == "NONE")
+        assertEquals("NONE", BlockAction.NONE.name)
     }
 
     @Test
     fun goBackActionExists() {
-        val goBack = BlockAction.GO_BACK
-        assertTrue(goBack.name == "GO_BACK")
+        assertEquals("GO_BACK", BlockAction.GO_BACK.name)
     }
 
     @Test
     fun goHomeAndReopenActionExists() {
-        val goHome = BlockAction.GO_HOME_AND_REOPEN_APP
-        assertTrue(goHome.name == "GO_HOME_AND_REOPEN_APP")
+        assertEquals("GO_HOME_AND_REOPEN_APP", BlockAction.GO_HOME_AND_REOPEN_APP.name)
+    }
+
+    @Test
+    fun clickSafeTabActionExists() {
+        assertEquals("CLICK_SAFE_TAB", BlockAction.CLICK_SAFE_TAB.name)
     }
 }
