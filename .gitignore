@@ -1,0 +1,141 @@
+# Gradle
+.gradle/
+build/
+*.jar
+*.zip
+*.aar
+
+# Local configuration
+local.properties
+*.properties
+
+# IDE - Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - Other
+.classpath
+.project
+.settings/
+*.swp
+*.swo
+*~
+
+# Build artifacts
+out/
+bin/
+dist/
+*.apk
+*.ap_
+*.dex
+*.class
+*.log
+
+# Android
+.android/
+captures/
+lint-results.xml
+*.lint
+proguard-mapping.txt
+
+# Kotlin
+*.kotlin_module
+kotlinc-result.xml
+
+# JetBrains
+.kotlin_history
+kotlin-test-results/
+
+# Test results
+test-results/
+**/test-results/**
+**/*.xml
+*.trx
+
+# Coverage
+coverage/
+*.coverage
+.coverage
+*.gcda
+*.gcno
+
+# Node (if used)
+node_modules/
+npm-debug.log
+yarn-error.log
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+ENV/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.bak
+*.swp
+*~
+
+# CI/CD
+.circleci/config.local.yml
+.travis.local.yml
+
+# Secrets & Credentials
+.env
+.env.local
+.env.*.local
+secrets/
+*.key
+*.pem
+*.keystore
+*.jks
+*.p12
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+.cache/
+.tmp/
+
+# Lock files (uncomment if you want to commit them)
+# Gradle lock files are typically committed
+# *.lock
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Platform-specific
+.env.production.local
+.env.test.local
+.env.development.local
