@@ -1,0 +1,38 @@
+CREATE TABLE block_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    packageName TEXT NOT NULL,
+    appName TEXT,
+    blockAction TEXT NOT NULL,
+    reason TEXT,
+    timestampMillis INTEGER NOT NULL
+);
+
+getBlocksSince:
+SELECT *
+FROM block_events
+WHERE timestampMillis >= ?
+ORDER BY timestampMillis DESC;
+
+getBlocksByPackage:
+SELECT *
+FROM block_events
+WHERE packageName = ?
+ORDER BY timestampMillis DESC;
+
+countBlocksToday:
+SELECT COUNT(*) as count
+FROM block_events
+WHERE timestampMillis >= ?;
+
+insertBlock:
+INSERT INTO block_events (packageName, appName, blockAction, reason, timestampMillis)
+VALUES (?, ?, ?, ?, ?);
+
+getAllBlocks:
+SELECT *
+FROM block_events
+ORDER BY timestampMillis DESC;
+
+deleteOldBlocks:
+DELETE FROM block_events
+WHERE timestampMillis < ?;
