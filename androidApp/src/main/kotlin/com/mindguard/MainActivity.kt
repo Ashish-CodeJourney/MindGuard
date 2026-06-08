@@ -1,21 +1,114 @@
 package com.mindguard
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
+import android.text.TextUtils
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.mindguard.ui.screens.HomeScreen
+import com.mindguard.ui.screens.OnboardingScreen
+import com.mindguard.ui.screens.PermissionsScreen
+import com.mindguard.ui.screens.StatsScreen
+import com.mindguard.ui.theme.MindGuardTheme
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MindGuardApp()
+            MindGuardTheme {
+                MindGuardApp(
+                    checkAccessibilityEnabled = { isAccessibilityServiceEnabled() },
+                    onOpenAccessibilitySettings = {
+                        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    }
+                )
+            }
         }
+    }
+
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        val enabled = Settings.Secure.getString(
+            contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+        val splitter = TextUtils.SimpleStringSplitter(':')
+        splitter.setString(enabled)
+        while (splitter.hasNext()) {
+            if (splitter.next().equals(
+                    "$packageName/.accessibility.MindGuardAccessibilityService",
+                    ignoreCase = true
+                )
+            ) return true
+        }
+        return false
     }
 }
 
+private enum class Screen { ONBOARDING, PERMISSIONS, HOME, STATS }
+
 @Composable
-fun MindGuardApp() {
-    Text("MindGuard - Coming Soon")
+fun MindGuardApp(
+    checkAccessibilityEnabled: () -> Boolean,
+    onOpenAccessibilitySettings: () -> Unit,
+    viewModel: MainViewModel = koinViewModel()
+) {
+    val onboardingComplete  by viewModel.onboardingComplete.collectAsState()
+    val protectionEnabled   by viewModel.protectionEnabled.collectAsState()
+    val blockCountToday     by viewModel.blockCountToday.collectAsState()
+    val attemptCountToday   by viewModel.attemptCountToday.collectAsState()
+    val totalBlocks         by viewModel.totalBlocks.collectAsState()
+    val totalAttempts       by viewModel.totalAttempts.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var accessibilityEnabled by remember { mutableStateOf(checkAccessibilityEnabled()) }
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) accessibilityEnabled = checkAccessibilityEnabled()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
+    val startScreen = when {
+        !onboardingComplete    -> Screen.ONBOARDING
+        !accessibilityEnabled  -> Screen.PERMISSIONS
+        else                   -> Screen.HOME
+    }
+    var currentScreen by remember(onboardingComplete, accessibilityEnabled) {
+        mutableStateOf(startScreen)
+    }
+
+    when (currentScreen) {
+        Screen.ONBOARDING -> OnboardingScreen(
+            onContinue = {
+                viewModel.completeOnboarding()
+                currentScreen = if (accessibilityEnabled) Screen.HOME else Screen.PERMISSIONS
+            }
+        )
+        Screen.PERMISSIONS -> PermissionsScreen(
+            isGranted = accessibilityEnabled,
+            onOpenSettings = onOpenAccessibilitySettings,
+            onContinue = { currentScreen = Screen.HOME }
+        )
+        Screen.HOME -> HomeScreen(
+            protectionEnabled = protectionEnabled,
+            blockCount        = blockCountToday,
+            attemptCount      = attemptCountToday,
+            onToggleProtection = viewModel::toggleProtection,
+            onViewStats = { currentScreen = Screen.STATS }
+        )
+        Screen.STATS -> StatsScreen(
+            blockCountToday   = blockCountToday,
+            attemptCountToday = attemptCountToday,
+            totalBlocks       = totalBlocks,
+            totalAttempts     = totalAttempts,
+            onBack = { currentScreen = Screen.HOME }
+        )
+    }
 }

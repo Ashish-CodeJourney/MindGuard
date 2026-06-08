@@ -6,8 +6,20 @@ import com.mindguard.shared.rules.InstagramReelRule
 import com.mindguard.shared.rules.RuleEngine
 import com.mindguard.shared.usecases.BlockCooldown
 import com.mindguard.shared.usecases.DetectBlockedContentUseCase
+import com.mindguard.storage.SettingsDataStore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class MindGuardAccessibilityService : AccessibilityService() {
+class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
+
+    private val settingsDataStore: SettingsDataStore by inject()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private lateinit var converter: AccessibilityEventConverter
     private lateinit var debouncer: AccessibilityEventDebouncer
@@ -17,77 +29,46 @@ class MindGuardAccessibilityService : AccessibilityService() {
 
     override fun onCreate() {
         super.onCreate()
-
         converter = AccessibilityEventConverter()
-        debouncer = AccessibilityEventDebouncer(debounceMs = 100L)
-        executor = BlockActionExecutor(this)
-
-        val instagramRule = InstagramReelRule()
-        val ruleEngine = RuleEngine(listOf(instagramRule))
-        detector = DetectBlockedContentUseCase(ruleEngine) { message ->
-            logDebug(message)
-        }
-
-        cooldown = BlockCooldown(cooldownMs = 2000L)
-
-        logDebug("MindGuard Accessibility Service created")
+        debouncer  = AccessibilityEventDebouncer(debounceMs = 100L)
+        executor   = BlockActionExecutor(this)
+        detector   = DetectBlockedContentUseCase(RuleEngine(listOf(InstagramReelRule())))
+        cooldown   = BlockCooldown(cooldownMs = 2_000L)
+        serviceScope.launch { settingsDataStore.resetDailyCountsIfNeeded() }
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
-
-        val shouldProcess = debouncer.debounce {
-            processEvent(event)
-        }
-
-        if (shouldProcess) {
-            processEvent(event)
-        }
+        if (debouncer.debounce { processEvent(event) }) processEvent(event)
     }
 
     private fun processEvent(event: AccessibilityEvent) {
         try {
             val snapshot = converter.toScreenSnapshot(event) ?: return
+            val result   = detector.execute(snapshot)
+            if (!result.shouldBlock) return
+
             val now = System.currentTimeMillis()
-
-            if (!cooldown.canBlock(now)) {
-                return
-            }
-
-            val result = detector.execute(snapshot)
-
-            if (result.shouldBlock) {
-                cooldown.recordBlock(now)
-                executeBlockAction(result.action)
+            serviceScope.launch {
+                if (!settingsDataStore.protectionEnabledFlow.first()) return@launch
+                settingsDataStore.recordAttempt()
+                if (cooldown.canBlock(now)) {
+                    cooldown.recordBlock(now)
+                    settingsDataStore.recordBlock()
+                    executeBlockAction(result.action)
+                }
             }
         } catch (e: Exception) {
-            logDebug("Error processing accessibility event: ${e.message}")
+            android.util.Log.e("MindGuard", "processEvent error: ${e.message}")
         }
     }
 
     private fun executeBlockAction(action: com.mindguard.shared.models.BlockAction) {
-        try {
-            val success = executor.execute(action)
-            if (success) {
-                logDebug("Successfully executed block action: $action")
-            } else {
-                logDebug("Failed to execute block action: $action")
-            }
-        } catch (e: Exception) {
-            logDebug("Error executing block action: ${e.message}")
+        try { executor.execute(action) } catch (e: Exception) {
+            android.util.Log.e("MindGuard", "executeBlockAction error: ${e.message}")
         }
     }
 
-    override fun onInterrupt() {
-        logDebug("MindGuard Accessibility Service interrupted")
-    }
-
-    override fun onDestroy() {
-        logDebug("MindGuard Accessibility Service destroyed")
-        super.onDestroy()
-    }
-
-    private fun logDebug(message: String) {
-        android.util.Log.d("MindGuard", message)
-    }
+    override fun onInterrupt() = Unit
+    override fun onDestroy() { serviceScope.cancel(); super.onDestroy() }
 }
