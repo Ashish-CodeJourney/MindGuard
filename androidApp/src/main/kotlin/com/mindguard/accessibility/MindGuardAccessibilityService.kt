@@ -13,12 +13,14 @@ class MindGuardAccessibilityService : AccessibilityService() {
     private lateinit var debouncer: AccessibilityEventDebouncer
     private lateinit var detector: DetectBlockedContentUseCase
     private lateinit var cooldown: BlockCooldown
+    private lateinit var executor: BlockActionExecutor
 
     override fun onCreate() {
         super.onCreate()
 
         converter = AccessibilityEventConverter()
         debouncer = AccessibilityEventDebouncer(debounceMs = 100L)
+        executor = BlockActionExecutor(this)
 
         val instagramRule = InstagramReelRule()
         val ruleEngine = RuleEngine(listOf(instagramRule))
@@ -64,8 +66,16 @@ class MindGuardAccessibilityService : AccessibilityService() {
     }
 
     private fun executeBlockAction(action: com.mindguard.shared.models.BlockAction) {
-        // Action execution will be implemented in next steps
-        logDebug("Block action: $action")
+        try {
+            val success = executor.execute(action)
+            if (success) {
+                logDebug("Successfully executed block action: $action")
+            } else {
+                logDebug("Failed to execute block action: $action")
+            }
+        } catch (e: Exception) {
+            logDebug("Error executing block action: ${e.message}")
+        }
     }
 
     override fun onInterrupt() {
