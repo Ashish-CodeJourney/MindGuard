@@ -41,14 +41,14 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mindguard-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           path: '**/build/test-results/**/*.xml'
@@ -154,7 +154,7 @@ jobs:
         run: ./gradlew assembleRelease
 
       - name: Upload release APK
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mindguard-release-apk
           path: androidApp/build/outputs/apk/release/*.apk
