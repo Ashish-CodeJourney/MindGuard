@@ -1,6 +1,7 @@
 package com.mindguard.storage
 
 import android.content.Context
+import android.os.Build
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -160,7 +161,11 @@ class SettingsDataStore(private val context: Context) {
     }
 
     suspend fun resetDailyCountsIfNeeded() {
-        val todayEpochDay = LocalDate.now().toEpochDay()
+        val todayEpochDay = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDate.now().toEpochDay()
+        } else {
+            (System.currentTimeMillis() / (24 * 60 * 60 * 1000))
+        }
         val prefs = context.dataStore.data.first()
         if ((prefs[LAST_RESET_DAY] ?: 0L) >= todayEpochDay) return
 
