@@ -1,75 +1,126 @@
-# MindGuard
+# 🛡️ MindGuard
 
-**Reclaim your attention.** MindGuard is a privacy-first Android app that automatically detects and blocks short-form video feeds — Instagram Reels, YouTube Shorts, TikTok, and Snapchat Spotlight — entirely on-device.
+**Reclaim your attention. Block Instagram Reels, YouTube Shorts, TikTok, and Snapchat Spotlight — entirely on your phone.**
 
----
-
-## Features
-
-| Feature | Detail |
-|---|---|
-| **Reel / Shorts / Spotlight blocking** | Instagram, YouTube, TikTok, Snapchat |
-| **Per-app toggles** | Enable or disable blocking per app |
-| **Focus schedule** | Block only during configurable hours (supports overnight ranges) |
-| **Pause focus mode** | 30-minute pause from the app or directly from the notification shade |
-| **Quick Settings tile** | Tap "Focus Mode" tile to pause/resume without opening the app |
-| **Daily stats** | Blocks today, attempts today |
-| **All-time stats** | Total blocks, total attempts |
-| **Streak tracking** | Current clean-day streak and all-time best |
-| **On-device only** | No accounts, no cloud, no tracking |
-| **Play Protect compliant** | Passes Google Play Protect review |
+MindGuard is a privacy-first Android app that detects and blocks short-form video feeds before you get sucked in. No accounts. No tracking. No servers. Just you, your focus, and 500ms of protection.
 
 ---
 
-## How it works
+## The Problem
 
-MindGuard uses Android's Accessibility Service to inspect UI events from the four target apps only. When the short-video player is detected on screen, the service navigates away before you can get drawn in.
+You pick up your phone for one thing. Instagram for 5 minutes. YouTube to find a tutorial. TikTok just to check. Snapchat for your streak.
+
+Three hours later, you're still scrolling. You lost the afternoon. Again.
+
+MindGuard stops this. Instantly.
+
+---
+
+## How It Works
+
+When you open Instagram and navigate to Reels, MindGuard **detects the exact moment the short-video player loads** and hits back before you can get hooked. Same with YouTube Shorts, TikTok, and Snapchat Spotlight.
+
+All of this happens:
+- **On your phone** — no internet needed
+- **In 500ms** — faster than you can react
+- **With zero data collection** — your choices stay yours
+
+---
+
+## What You Get
+
+### Home Screen — Status at a Glance
+
+See if blocking is active and track your progress in real-time.
+
+<div align="center">
+  <img src="docs/screenshots/home-screen.png" alt="MindGuard Home Screen" width="300" />
+</div>
+
+- **Active Shield** — blocks are running, Reels & Shorts can't get you
+- **Reels Blocked** — how many times the app saved you today
+- **Time Saved** — estimated hours you didn't lose
+- **Attempts** — how many times you *wanted* a short-form feed
+- **Deflected** — your success rate (blocks / attempts)
+- **Streak** — current clean days + your personal best
+
+### Settings — Fine-Grained Control
+
+Decide which apps to block and when.
+
+<div align="center">
+  <img src="docs/screenshots/settings-screen.png" alt="MindGuard Settings Screen" width="300" />
+</div>
+
+**Per-App Toggles**
+- Instagram Reels
+- YouTube Shorts
+- TikTok
+- Snapchat Spotlight
+
+**Focus Schedule**
+- Auto-block during work hours (or custom times)
+- Pause manually anytime
+- 30-second pause button in notification shade
+
+**Streak Tracking**
+- See your current streak and personal best
+- Built-in motivation to keep the streak alive
+
+### Setup — Two Steps (Android 13+)
+
+<div align="center">
+  <img src="docs/screenshots/permission-setup.png" alt="MindGuard Permission Setup" width="300" />
+</div>
+
+1. **Allow Restricted Settings** (one-time, Android 13+ only)
+2. **Enable MindGuard Accessibility Service**
+
+That's it. Blocking starts immediately.
+
+---
+
+## Under the Hood
+
+MindGuard uses Android's **Accessibility API** to read screen layout in real-time. It watches for specific resource IDs that indicate the short-video player is on screen, then instantly navigates away.
 
 ```
-AccessibilityEvent (from Instagram / YouTube / TikTok / Snapchat)
-        │
-        ▼
-AccessibilityEventConverter
-  └─ BFS node traversal (depth 15) + rootInActiveWindow augment
-  └─ Extracts resource IDs (requires flagReportViewIds)
-        │
-        ▼
-ScreenSnapshot { packageName, resourceIds, screenText, contentDescriptions }
-        │
-        ▼
-RuleEngine
-  ├─ InstagramReelRule   → clips_viewer_view_pager, reel_pager, …
-  ├─ YouTubeShortsRule   → reel_watch_fragment_root, reel_progress_bar, …
-  ├─ TikTokRule          → TikTok video-feed resource IDs
-  └─ SnapchatSpotlightRule → spotlight_container
-        │
-        ▼ shouldBlock = true
-BlockCooldown (500 ms)
-        │
-        ▼
-BlockActionExecutor
-  ├─ Instagram → CLICK_SAFE_TAB  (clicks Home feed tab, stays in app)
-  └─ Others   → GO_BACK         (system back press)
-        │
-        ▼
-800 ms watchdog rescans rootInActiveWindow while blocked app is foreground
+User opens Instagram Reels
+           ↓
+AccessibilityService detects 'reel_pager' resource ID
+           ↓
+RuleEngine evaluates: "Is this a Reels player?"
+           ↓
+Decision: YES → Block
+           ↓
+BlockActionExecutor clicks Home tab (stay in Instagram)
+           ↓
+User sees Home feed instead of Reels
+           ↓
+MindGuard logs: +1 block, +1 attempt
 ```
 
-### Detection design
+### Why Resource IDs?
 
-Detection is **resource-ID only** — no text or navigation-tab signals. This means:
-- Opening YouTube does not trigger a block (Shorts nav tab visible but not the player)
-- Opening Instagram does not trigger a block (Reels nav tab visible but not the player)
-- Only confirmed player-specific view IDs trigger a block
+MindGuard doesn't read text or analyze navigation buttons. It uses **resource IDs only** — internal view IDs that identify the exact component.
 
-| App | Blocked when these resource IDs appear |
+This means:
+- Opening Instagram doesn't trigger a block (just the app icon shows, no Reels player)
+- Opening YouTube doesn't trigger a block (Shorts nav tab visible, but player not loaded)
+- **Only the confirmed player-specific layout triggers a block**
+
+### Detection Accuracy
+
+Each app's short-form player has its own set of signature resource IDs:
+
+| App | Blocked Player IDs |
 |---|---|
-| Instagram | `clips_viewer_view_pager`, `reel_pager`, `reel_play_button`, `reel_component`, `clips_swipe_container`, `reels_viewer`, `reel_feed_recycler_view`, `ig_reels_player_container` |
-| YouTube | `reel_watch_fragment_root`, `reel_progress_bar`, `shorts_video_header`, `shorts_container`, `shorts_vertical_feed_container`, `reel_player_page_container` |
-| TikTok | TikTok video-feed container IDs |
-| Snapchat | `spotlight_container` |
+| **Instagram** | `clips_viewer_view_pager`, `reel_pager`, `reel_play_button`, `reels_viewer` |
+| **YouTube** | `reel_watch_fragment_root`, `reel_progress_bar`, `shorts_container` |
+| **TikTok** | TikTok video-feed container IDs |
+| **Snapchat** | `spotlight_container` |
 
-Instagram's home feed, profile pages, and Explore are never blocked — the service uses an explicit feed-screen guard (`feed_pager`, `feed_container`, `stories_container`) that short-circuits detection.
+Instagram's home feed, Explore, and Messaging **are never blocked** — the service has an explicit guard that short-circuits detection for feed screens.
 
 ---
 
@@ -77,142 +128,130 @@ Instagram's home feed, profile pages, and Explore are never blocked — the serv
 
 ```
 mindguard/
-├── shared/                        # Kotlin Multiplatform — pure business logic
-│   └── commonMain/
-│       ├── models/                # ScreenSnapshot, DetectionResult, BlockAction
-│       ├── rules/                 # InstagramReelRule, YouTubeShortsRule, TikTokRule,
-│       │                          #   SnapchatSpotlightRule, RuleEngine, BlockingRule
-│       └── usecases/              # DetectBlockedContentUseCase, BlockCooldown,
-│                                  #   FocusPauseLogic (isPausedAt pure function)
+├── shared/                  ← Pure Kotlin (no Android deps)
+│   └── commonTest/
+│       ├── rules/           RuleEngine, InstagramReelRule, YouTubeShortsRule, ...
+│       ├── models/          ScreenSnapshot, DetectionResult, BlockAction
+│       └── usecases/        FocusPauseLogic, BlockCooldown, DetectBlockedContentUseCase
 │
-└── androidApp/                    # Android-specific
-    ├── accessibility/             # MindGuardAccessibilityService, AccessibilityEventConverter,
-    │                              #   BlockActionExecutor
-    ├── storage/                   # SettingsDataStore (DataStore Preferences)
-    ├── tile/                      # FocusTileService (Quick Settings tile)
-    ├── ui/screens/                # Compose screens: Onboarding, Permissions, Home,
-    │                              #   Stats, Settings
-    └── di/                        # Koin modules
+└── androidApp/              ← Android layer
+    ├── accessibility/       MindGuardAccessibilityService, BlockActionExecutor
+    ├── storage/             SettingsDataStore (DataStore Preferences)
+    ├── ui/                  Compose screens: Home, Settings, Stats, Onboarding
+    └── di/                  Koin dependency injection
 ```
 
-The shared module has zero Android dependencies — all rules and use cases are plain Kotlin and fully unit-testable on the JVM.
-
----
-
-## Screens
-
-**Onboarding** — explains what the service does before asking for permission.
-
-**Permissions** — guides setup:
-- Android 13+ sideloaded builds: two-step guide (allow restricted settings → enable service)
-- Play Store / older builds: single-step (enable service)
-- Advances automatically within 500 ms of permission being granted
-
-**Home** — focus mode toggle, today's block count, streak, pause button (when active).
-
-**Stats** — today + all-time blocks and attempts.
-
-**Settings** — per-app toggles, focus schedule (start/end hour).
-
----
-
-## Privacy
-
-- All detection runs entirely on-device
-- No network requests
-- No user accounts or sign-in
-- Accessibility service scope restricted to 6 package names via `android:packageNames`
-- Service description is explicit: reads view IDs and visible text only within Instagram, YouTube, TikTok, and Snapchat; no data is collected, stored remotely, or transmitted
-- `BIND_ACCESSIBILITY_SERVICE` is a service-binding permission only — not declared in `<uses-permission>` (Play Protect requirement)
-
----
-
-## Requirements
-
-- Android 7.0+ (minSdk 24)
-- Accessibility Service permission (granted manually in system settings)
+The shared module is **100% testable on the JVM** — zero Android dependencies. All detection logic, rules, and decision-making run as unit tests before any Android code touches them.
 
 ---
 
 ## Installation
 
-**From source:**
+### From GitHub Releases
+
+Download the APK from the [latest release](https://github.com/Ashish-CodeJourney/MindGuard/releases) and install it.
+
+### From Source
 
 ```bash
 git clone https://github.com/Ashish-CodeJourney/MindGuard.git
 cd MindGuard
 ./gradlew :androidApp:assembleDebug
-# Install the APK at androidApp/build/outputs/apk/debug/
+# APK at: androidApp/build/outputs/apk/debug/app-debug.apk
 ```
 
-After installing a sideloaded APK on Android 13+:
+### Android 13+ Setup
+
+After installing a sideloaded APK:
+
 1. Go to **Settings → Apps → MindGuard**
 2. Tap ⋮ → **Allow restricted settings**
-3. Go to **Settings → Accessibility → MindGuard** → enable the toggle
+3. Go to **Settings → Accessibility → MindGuard** → enable
 
-**Adding the Quick Settings tile:** long-press the notification shade → tap "Edit tiles" → drag **Focus Mode** into your active tiles.
+### Quick Settings Tile (Optional)
+
+Long-press your notification shade → **Edit tiles** → drag **Focus Mode** into active tiles. Now you can pause blocking with one tap.
+
+---
+
+## Privacy
+
+- ✅ **On-device only** — all detection runs locally
+- ✅ **No accounts** — nothing to sign up for
+- ✅ **No tracking** — no analytics, no user profiling
+- ✅ **No internet** — zero network requests
+- ✅ **Accessibility scope limited** — service can only read from 4 apps (Instagram, YouTube, TikTok, Snapchat)
+- ✅ **Explicit consent** — you enable it manually in system settings
+
+Read the full [accessibility declaration](https://github.com/Ashish-CodeJourney/MindGuard/blob/main/androidApp/src/main/AndroidManifest.xml#L45-L60).
 
 ---
 
 ## Development
 
-### Tech stack
-
-| Layer | Technology |
-|---|---|
-| Language | Kotlin (Multiplatform) |
-| UI | Jetpack Compose + Material 3 |
-| Async | Coroutines + Flow |
-| Storage | DataStore Preferences |
-| DI | Koin |
-| Testing | Kotlin Test (TDD) |
-| Build | Gradle Kotlin DSL |
-
-### Running tests
+### Running Tests
 
 ```bash
 ./gradlew :shared:testDebugUnitTest
 ```
 
-All production code in the shared module is written test-first. Tests live in `shared/src/commonTest/` and run on the JVM with no Android dependencies.
+All business logic is **test-first** (TDD). Tests live in `shared/src/commonTest/` and run on the JVM.
 
-### Adding a new blocking rule
+### Tech Stack
 
-1. Implement `BlockingRule` in the shared module:
+- **Language** — Kotlin Multiplatform (shared logic + Android UI)
+- **UI** — Jetpack Compose + Material 3
+- **Async** — Coroutines + Flow
+- **Storage** — DataStore Preferences
+- **DI** — Koin
+- **Testing** — Kotlin Test
+
+### Adding a New Blocking Rule
+
+1. Create a new `BlockingRule` in the shared module:
 
 ```kotlin
-class NewAppRule : BlockingRule {
+class BeRealRule : BlockingRule {
     override fun evaluate(snapshot: ScreenSnapshot): DetectionResult {
-        if (snapshot.packageName != "com.example.app") return noBlock()
-        val hasPlayerResourceId = snapshot.resourceIds.any { id ->
-            PLAYER_RESOURCE_IDS.any { id.contains(it, ignoreCase = true) }
-        }
-        return if (hasPlayerResourceId)
-            DetectionResult(shouldBlock = true, action = BlockAction.GO_BACK, reason = "...")
+        if (snapshot.packageName != "com.bereal.app") return noBlock()
+        
+        return if (snapshot.resourceIds.any { it.contains("camera_view") })
+            DetectionResult(shouldBlock = true, action = BlockAction.GO_BACK, reason = "BeReal camera detected")
         else noBlock()
     }
 }
 ```
 
-2. Register it in `MindGuardAccessibilityService`:
+2. Register in `MindGuardAccessibilityService`:
 
 ```kotlin
-RuleEngine(listOf(InstagramReelRule(), YouTubeShortsRule(), TikTokRule(), SnapchatSpotlightRule(), NewAppRule()))
+RuleEngine(listOf(
+    InstagramReelRule(), YouTubeShortsRule(), TikTokRule(), 
+    SnapchatSpotlightRule(), BeRealRule()  // add here
+))
 ```
 
-3. Add the package name to `accessibility_config.xml`'s `android:packageNames` and to `SettingsDataStore`.
+3. Add the package name to:
+   - `androidApp/src/main/res/xml/accessibility_config.xml` (service scope)
+   - `SettingsDataStore` (user toggles)
 
 ---
 
-## Contributing
+## Requirements
 
-- Follow TDD: write a failing test before any production code
-- Use conventional commits (`feat:`, `fix:`, `refactor:`, `test:`)
-- Keep the shared module free of Android dependencies
-- PRs welcome via GitHub Issues / Discussions
+- **Android 7.0+** (API 24+)
+- **Accessibility Service permission** (granted in system settings)
 
 ---
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE)
+
+---
+
+## Questions?
+
+- 💬 GitHub [Discussions](https://github.com/Ashish-CodeJourney/MindGuard/discussions)
+- 🐛 Found a bug? [Issues](https://github.com/Ashish-CodeJourney/MindGuard/issues)
+- 🤝 Want to contribute? PRs welcome!
