@@ -1,0 +1,12 @@
+---
+builds:
+  - versionName: "0.1.0"
+    versionCode: 1
+    commit: "HEAD"
+    gradle:
+      - yes
+    scanignore:
+      - androidApp/build.gradle.kts
+    srclibs:
+      - kotlin-gradle-plugin@v1.9.22
+    prebuild: mkdir -p "$$SDK/ndk/26.1.10909125" && touch "$$SDK/ndk/26.1.10909125/source.properties"

@@ -1,0 +1,1 @@
+Block short-form video feeds on-device with no data collection

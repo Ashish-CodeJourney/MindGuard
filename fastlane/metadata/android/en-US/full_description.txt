@@ -1,0 +1,26 @@
+Reclaim your attention. MindGuard is a privacy-first Android app that automatically detects and blocks short-form video feeds — Instagram Reels, YouTube Shorts, TikTok, and Snapchat Spotlight — entirely on-device.
+
+FEATURES
+• Reel / Shorts / Spotlight blocking for Instagram, YouTube, TikTok, and Snapchat
+• Per-app toggles to enable or disable blocking per app
+• Focus schedule with configurable hours (supports overnight ranges)
+• Pause focus mode for 30 minutes from the app or notification shade
+• Quick Settings tile for tap-to-toggle without opening the app
+• Daily and all-time statistics (blocks, attempts, streaks)
+• 100% on-device — no accounts, no cloud, no tracking
+
+HOW IT WORKS
+MindGuard uses Android's Accessibility Service to inspect UI events only from the four target apps. When the short-video player is detected on screen, the service navigates away automatically before you can get drawn in.
+
+PRIVACY
+• All detection runs entirely on-device
+• No network requests
+• No user accounts or sign-in
+• Service scope restricted to Instagram, YouTube, TikTok, and Snapchat
+• No data is collected, stored remotely, or transmitted
+
+REQUIREMENTS
+• Android 7.0+ (API 24+)
+• Accessibility Service permission (granted manually in system settings)
+
+Open source and MIT licensed.
