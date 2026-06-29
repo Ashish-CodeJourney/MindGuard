@@ -31,7 +31,8 @@ class AccessibilityEventConverter {
             screenText = text.distinct(),
             contentDescriptions = descriptions.distinct(),
             resourceIds = resourceIds.distinct(),
-            timestampMillis = System.currentTimeMillis()
+            timestampMillis = System.currentTimeMillis(),
+            windowClassName = event.className?.toString()?.takeIf { it.isNotBlank() }
         )
     }
 
