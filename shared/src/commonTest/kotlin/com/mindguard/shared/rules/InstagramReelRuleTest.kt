@@ -15,16 +15,16 @@ class InstagramReelRuleTest {
         packageName: String = "com.instagram.android",
         screenText: List<String> = emptyList(),
         contentDescriptions: List<String> = emptyList(),
-        resourceIds: List<String> = emptyList()
-    ): ScreenSnapshot {
-        return ScreenSnapshot(
-            packageName = packageName,
-            screenText = screenText,
-            contentDescriptions = contentDescriptions,
-            resourceIds = resourceIds,
-            timestampMillis = 1000L
-        )
-    }
+        resourceIds: List<String> = emptyList(),
+        windowClassName: String? = null
+    ): ScreenSnapshot = ScreenSnapshot(
+        packageName = packageName,
+        screenText = screenText,
+        contentDescriptions = contentDescriptions,
+        resourceIds = resourceIds,
+        timestampMillis = 1000L,
+        windowClassName = windowClassName
+    )
 
     @Test
     fun detectsReelWhenAllSignalsPresent() {
@@ -257,5 +257,73 @@ class InstagramReelRuleTest {
 
         assertTrue(result.shouldBlock)
         assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
+    }
+
+    // ── Class-name detection (instant — no resource IDs needed) ───────────────
+
+    @Test
+    fun blocksInstantlyWhenClassNameIndicatesClipsViewerFragment() {
+        val result = rule.evaluate(
+            createSnapshot(windowClassName = "com.instagram.android.clips.fragment.ClipsViewerFragment")
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
+    }
+
+    @Test
+    fun blocksWhenClassNameContainsVerticalStream() {
+        val result = rule.evaluate(
+            createSnapshot(windowClassName = "com.instagram.android.reels.fragment.VerticalStreamFragment")
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
+    }
+
+    @Test
+    fun blocksWhenClassNameContainsClipsCaseInsensitive() {
+        val result = rule.evaluate(
+            createSnapshot(windowClassName = "com.instagram.android.CLIPS.SomeActivity")
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.CLICK_SAFE_TAB, result.action)
+    }
+
+    @Test
+    fun classNameDetectionRequiresNoResourceIds() {
+        val result = rule.evaluate(
+            createSnapshot(
+                windowClassName = "com.instagram.android.clips.fragment.ClipsViewerFragment",
+                resourceIds = emptyList()
+            )
+        )
+        assertTrue(result.shouldBlock)
+    }
+
+    @Test
+    fun doesNotBlockWhenClassNameIsMainTabActivity() {
+        val result = rule.evaluate(
+            createSnapshot(windowClassName = "com.instagram.android.activity.MainTabActivity")
+        )
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
+    }
+
+    @Test
+    fun doesNotBlockWhenClassNameIsNull() {
+        val result = rule.evaluate(
+            createSnapshot(windowClassName = null, resourceIds = emptyList())
+        )
+        assertFalse(result.shouldBlock)
+    }
+
+    @Test
+    fun doesNotBlockForDifferentPackageEvenWithReelClassName() {
+        val result = rule.evaluate(
+            createSnapshot(
+                packageName = "com.twitter.android",
+                windowClassName = "com.twitter.android.clips.ClipsViewerFragment"
+            )
+        )
+        assertFalse(result.shouldBlock)
     }
 }
