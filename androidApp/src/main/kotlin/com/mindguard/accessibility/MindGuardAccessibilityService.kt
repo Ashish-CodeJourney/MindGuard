@@ -48,12 +48,16 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
     @Volatile private var focusEndHour         = 17
     @Volatile private var pauseUntilMs         = 0L
 
-    // Watchdog: re-checks the current foreground window every 800ms for blocked packages.
+    // Watchdog: re-checks the current foreground window every WATCHDOG_INTERVAL_MS.
     // Suspended for POST_BLOCK_PAUSE_MS after each block to let navigation animations settle.
     private var watchdogJob: Job? = null
     private var watchdogPackage: String? = null
     private var lastBlockTimeMs: Long = 0L
-    private val POST_BLOCK_PAUSE_MS = 3_000L
+
+    companion object {
+        const val WATCHDOG_INTERVAL_MS = 300L
+        const val POST_BLOCK_PAUSE_MS  = 3_000L
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -138,7 +142,7 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
         watchdogPackage = pkg
         watchdogJob = serviceScope.launch {
             while (isActive) {
-                delay(800)
+                delay(WATCHDOG_INTERVAL_MS)
                 scanActiveWindowFor(pkg)
             }
         }
