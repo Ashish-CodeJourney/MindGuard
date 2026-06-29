@@ -32,26 +32,28 @@ class BlockActionExecutor(private val service: AccessibilityService) {
         }
     }
 
-    // Navigates to a safe in-app tab rather than pressing Back, which can close the app.
-    // Tries known Home-feed tab IDs for Instagram; falls back to GLOBAL_ACTION_BACK.
+    // Navigates to the Instagram Home-feed tab rather than pressing Back.
+    // Back press inside the Reels player stays within the reel stack causing an infinite loop.
+    // Strategy: try 6 known resource IDs across builds → try content-description "Home" →
+    // fall back to Android HOME key. GO_BACK is never used.
     private fun clickSafeTab(): Boolean {
         val root = try { service.rootInActiveWindow } catch (e: Exception) { null }
-            ?: return goBack()
+            ?: return service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
         return try {
-            val instagramHomeTabs = listOf(
-                "com.instagram.android:id/feed_tab",
-                "com.instagram.android:id/tab_feed"
-            )
-            for (id in instagramHomeTabs) {
+            // 1. Try known resource IDs in priority order
+            for (id in InstagramHomeTabStrategy.ORDERED_IDS) {
                 val nodes = root.findAccessibilityNodeInfosByViewId(id)
                 val tab = nodes.firstOrNull()
-                if (tab != null) {
-                    val clicked = tab.performAction(AccessibilityNodeInfo.ACTION_CLICK)
-                    nodes.forEach { it.recycle() }
-                    if (clicked) return true
-                }
+                nodes.forEach { it.recycle() }
+                if (tab != null && tab.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return true
             }
-            goBack()
+            // 2. Try content description "Home" (version-agnostic)
+            val homeNodes = root.findAccessibilityNodeInfosByText("Home")
+            val homeTab = homeNodes.firstOrNull { it.isClickable }
+            homeNodes.forEach { it.recycle() }
+            if (homeTab != null && homeTab.performAction(AccessibilityNodeInfo.ACTION_CLICK)) return true
+            // 3. Last resort: Android HOME key — never GO_BACK
+            service.performGlobalAction(AccessibilityService.GLOBAL_ACTION_HOME)
         } finally {
             root.recycle()
         }
