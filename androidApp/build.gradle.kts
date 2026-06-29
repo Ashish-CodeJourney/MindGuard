@@ -15,6 +15,11 @@ kotlin {
     }
 
     sourceSets {
+        val androidUnitTest by getting {
+            dependencies {
+                implementation(libs.kotlin.test)
+            }
+        }
         androidMain.dependencies {
             implementation(libs.kotlin.stdlib)
             implementation(libs.androidx.core.ktx)
