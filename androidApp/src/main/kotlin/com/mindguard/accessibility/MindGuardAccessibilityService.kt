@@ -98,6 +98,10 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
             val pkg = event.packageName?.toString() ?: return
             if (pkg !in enabledPackages) return
 
+            if (android.util.Log.isLoggable("MindGuard", android.util.Log.DEBUG)) {
+                android.util.Log.d("MindGuard", "Event pkg=$pkg class=${event.className} type=${event.eventType}")
+            }
+
             val snapshot = buildSnapshot(event) ?: return
             val result = detector.execute(snapshot)
             if (!result.shouldBlock) return
