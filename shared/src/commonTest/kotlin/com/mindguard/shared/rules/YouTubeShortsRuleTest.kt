@@ -15,13 +15,15 @@ class YouTubeShortsRuleTest {
         packageName: String = "com.google.android.youtube",
         screenText: List<String> = emptyList(),
         contentDescriptions: List<String> = emptyList(),
-        resourceIds: List<String> = emptyList()
+        resourceIds: List<String> = emptyList(),
+        windowClassName: String? = null
     ) = ScreenSnapshot(
         packageName = packageName,
         screenText = screenText,
         contentDescriptions = contentDescriptions,
         resourceIds = resourceIds,
-        timestampMillis = 1000L
+        timestampMillis = 1000L,
+        windowClassName = windowClassName
     )
 
     // ── Should block ─────────────────────────────────────────────────────────
@@ -156,5 +158,70 @@ class YouTubeShortsRuleTest {
         )
         assertTrue(result.shouldBlock)
         assertTrue(result.reason != null)
+    }
+
+    // ── Class-name detection (instant — no resource IDs needed) ───────────────
+
+    @Test
+    fun blocksInstantlyWhenClassNameIndicatesShortsFullscreenActivity() {
+        val result = rule.evaluate(
+            snapshot(windowClassName = "com.google.android.apps.youtube.app.shorts.ShortsFullscreenActivity")
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenClassNameContainsReelWatch() {
+        val result = rule.evaluate(
+            snapshot(windowClassName = "com.google.android.youtube.ui.ReelWatchFragment")
+        )
+        assertTrue(result.shouldBlock)
+        assertEquals(BlockAction.GO_BACK, result.action)
+    }
+
+    @Test
+    fun blocksWhenClassNameContainsShortsCaseInsensitive() {
+        val result = rule.evaluate(
+            snapshot(windowClassName = "com.google.android.apps.youtube.app.SHORTS.Something")
+        )
+        assertTrue(result.shouldBlock)
+    }
+
+    @Test
+    fun classNameDetectionRequiresNoResourceIds() {
+        val result = rule.evaluate(
+            snapshot(
+                windowClassName = "com.google.android.apps.youtube.app.shorts.ShortsFullscreenActivity",
+                resourceIds = emptyList()
+            )
+        )
+        assertTrue(result.shouldBlock)
+    }
+
+    @Test
+    fun doesNotBlockWhenClassNameIsYouTubeHomeActivity() {
+        val result = rule.evaluate(
+            snapshot(windowClassName = "com.google.android.apps.youtube.app.honeycomb.Shell\$HomeActivity")
+        )
+        assertFalse(result.shouldBlock)
+        assertEquals(BlockAction.NONE, result.action)
+    }
+
+    @Test
+    fun doesNotBlockWhenClassNameIsNull() {
+        val result = rule.evaluate(snapshot(windowClassName = null, resourceIds = emptyList()))
+        assertFalse(result.shouldBlock)
+    }
+
+    @Test
+    fun doesNotBlockForDifferentPackageEvenWithShortsClassName() {
+        val result = rule.evaluate(
+            snapshot(
+                packageName = "com.twitter.android",
+                windowClassName = "com.twitter.android.shorts.ShortsFragment"
+            )
+        )
+        assertFalse(result.shouldBlock)
     }
 }
