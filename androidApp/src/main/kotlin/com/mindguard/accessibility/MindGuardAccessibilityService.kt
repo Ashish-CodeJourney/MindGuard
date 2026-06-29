@@ -48,9 +48,12 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
     @Volatile private var focusEndHour         = 17
     @Volatile private var pauseUntilMs         = 0L
 
-    // Watchdog: re-checks the current foreground window every 800ms for blocked packages
+    // Watchdog: re-checks the current foreground window every 800ms for blocked packages.
+    // Suspended for POST_BLOCK_PAUSE_MS after each block to let navigation animations settle.
     private var watchdogJob: Job? = null
     private var watchdogPackage: String? = null
+    private var lastBlockTimeMs: Long = 0L
+    private val POST_BLOCK_PAUSE_MS = 3_000L
 
     override fun onCreate() {
         super.onCreate()
@@ -103,15 +106,19 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
 
     private fun maybeBlock(action: com.mindguard.shared.models.BlockAction) {
         val now = System.currentTimeMillis()
-        // Protection check is entirely synchronous — no DataStore read on the hot path.
         val isProtected = (protectionEnabled || isCurrentlyInFocusHours()) &&
             !isPausedAt(pauseUntilMs, now)
         if (!isProtected) return
 
+        // Suppress watchdog re-triggers for POST_BLOCK_PAUSE_MS after each block.
+        // This prevents the watchdog from firing again before the navigation animation
+        // (e.g. swipe-to-home-tab) has finished, which caused the Instagram refresh loop.
+        if (now - lastBlockTimeMs < POST_BLOCK_PAUSE_MS) return
+
         if (cooldown.canBlock(now)) {
+            lastBlockTimeMs = now
             cooldown.recordBlock(now)
             executeBlockAction(action)
-            // Stats recording is async (non-critical path)
             serviceScope.launch(Dispatchers.IO) {
                 settingsDataStore.recordAttempt()
                 settingsDataStore.recordBlock()
