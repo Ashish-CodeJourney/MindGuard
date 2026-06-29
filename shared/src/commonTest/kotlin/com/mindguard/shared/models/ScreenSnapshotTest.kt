@@ -3,6 +3,7 @@ package com.mindguard.shared.models
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
 class ScreenSnapshotTest {
 
@@ -107,6 +108,44 @@ class ScreenSnapshotTest {
             timestampMillis = 1000L
         )
         assertEquals(a, b)
+    }
+
+    @Test
+    fun defaultWindowClassNameIsNull() {
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = emptyList(),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L
+        )
+        assertNull(snapshot.windowClassName)
+    }
+
+    @Test
+    fun storesWindowClassName() {
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = emptyList(),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L,
+            windowClassName = "com.instagram.android.clips.fragment.ClipsViewerFragment"
+        )
+        assertEquals("com.instagram.android.clips.fragment.ClipsViewerFragment", snapshot.windowClassName)
+    }
+
+    @Test
+    fun storesBlankWindowClassNameAsIs() {
+        val snapshot = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = emptyList(),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L,
+            windowClassName = ""
+        )
+        assertEquals("", snapshot.windowClassName)
     }
 
     @Test
