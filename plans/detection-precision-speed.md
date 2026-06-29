@@ -1,7 +1,7 @@
 # Plan: Detection Precision and Speed
 
 **Branch**: feat/detection-precision-speed
-**Status**: Active
+**Status**: Implemented — pending empirical class-name verification on device (Step 7)
 
 ## Goal
 
