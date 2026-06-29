@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.accessibility.AccessibilityManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
 import androidx.lifecycle.Lifecycle
@@ -150,16 +151,21 @@ fun MindGuardApp(
             onViewStats        = { currentScreen = Screen.STATS },
             onOpenSettings     = { currentScreen = Screen.SETTINGS }
         )
-        Screen.STATS -> StatsScreen(
-            blockCountToday   = blockCountToday,
-            attemptCountToday = attemptCountToday,
-            totalBlocks       = totalBlocks,
-            totalAttempts     = totalAttempts,
-            currentStreak     = currentStreak,
-            bestStreak        = bestStreak,
-            onBack            = { currentScreen = Screen.HOME }
-        )
-        Screen.SETTINGS -> SettingsScreen(
+        Screen.STATS -> {
+            BackHandler { currentScreen = Screen.HOME }
+            StatsScreen(
+                blockCountToday   = blockCountToday,
+                attemptCountToday = attemptCountToday,
+                totalBlocks       = totalBlocks,
+                totalAttempts     = totalAttempts,
+                currentStreak     = currentStreak,
+                bestStreak        = bestStreak,
+                onBack            = { currentScreen = Screen.HOME }
+            )
+        }
+        Screen.SETTINGS -> {
+            BackHandler { currentScreen = Screen.HOME }
+            SettingsScreen(
             instagramEnabled     = instagramEnabled,
             youtubeEnabled       = youtubeEnabled,
             tiktokEnabled        = tiktokEnabled,
@@ -175,6 +181,7 @@ fun MindGuardApp(
             onSnapchatToggle     = viewModel::setSnapchatEnabled,
             onFocusScheduleChange = viewModel::setFocusSchedule,
             onBack               = { currentScreen = Screen.HOME }
-        )
+            )
+        }
     }
 }
