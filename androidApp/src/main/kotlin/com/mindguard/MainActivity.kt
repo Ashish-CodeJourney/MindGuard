@@ -96,6 +96,10 @@ fun MindGuardApp(
     val focusStartHour      by viewModel.focusStartHour.collectAsState()
     val focusEndHour        by viewModel.focusEndHour.collectAsState()
     val pauseUntil          by viewModel.pauseUntil.collectAsState()
+    val instagramBlocks     by viewModel.instagramBlocks.collectAsState()
+    val youtubeBlocks       by viewModel.youtubeBlocks.collectAsState()
+    val tiktokBlocks        by viewModel.tiktokBlocks.collectAsState()
+    val snapchatBlocks      by viewModel.snapchatBlocks.collectAsState()
 
     val lifecycleOwner = LocalLifecycleOwner.current
     var accessibilityEnabled by remember { mutableStateOf(checkAccessibilityEnabled()) }
@@ -160,6 +164,10 @@ fun MindGuardApp(
                 totalAttempts     = totalAttempts,
                 currentStreak     = currentStreak,
                 bestStreak        = bestStreak,
+                instagramBlocks   = instagramBlocks,
+                youtubeBlocks     = youtubeBlocks,
+                tiktokBlocks      = tiktokBlocks,
+                snapchatBlocks    = snapchatBlocks,
                 onBack            = { currentScreen = Screen.HOME }
             )
         }

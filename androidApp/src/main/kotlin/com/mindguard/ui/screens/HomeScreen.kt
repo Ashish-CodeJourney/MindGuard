@@ -115,7 +115,7 @@ fun HomeScreen(
                         Text(
                             when {
                                 isPaused          -> "Resumes at ${formatPauseTime(pauseUntilMs)}"
-                                protectionEnabled -> "Reels & Shorts are being blocked"
+                                protectionEnabled -> "Short-form videos are being blocked"
                                 else              -> "Protection is off"
                             },
                             fontSize = 13.sp,
@@ -149,7 +149,7 @@ fun HomeScreen(
 
         // 2×2 stats grid
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            StatCard("🚫", "Reels Blocked",  blockCount.toString(),            Modifier.weight(1f))
+            StatCard("🚫", "Videos Blocked", blockCount.toString(),            Modifier.weight(1f))
             StatCard("⏱️", "Time Saved",     formatDuration(timeSavedSeconds), Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.height(12.dp))

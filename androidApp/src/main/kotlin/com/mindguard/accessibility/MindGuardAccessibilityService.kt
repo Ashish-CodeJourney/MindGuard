@@ -98,13 +98,13 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
             val result = detector.execute(snapshot)
             if (!result.shouldBlock) return
 
-            maybeBlock(result.action)
+            maybeBlock(result.action, pkg)
         } catch (e: Exception) {
             android.util.Log.e("MindGuard", "processEvent error: ${e.message}")
         }
     }
 
-    private fun maybeBlock(action: com.mindguard.shared.models.BlockAction) {
+    private fun maybeBlock(action: com.mindguard.shared.models.BlockAction, packageName: String = "") {
         val now = System.currentTimeMillis()
         val isProtected = (protectionEnabled || isCurrentlyInFocusHours()) &&
             !isPausedAt(pauseUntilMs, now)
@@ -121,7 +121,7 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
             executeBlockAction(action)
             serviceScope.launch(Dispatchers.IO) {
                 settingsDataStore.recordAttempt()
-                settingsDataStore.recordBlock()
+                settingsDataStore.recordBlock(packageName)
             }
         }
     }
@@ -159,7 +159,7 @@ class MindGuardAccessibilityService : AccessibilityService(), KoinComponent {
             root.recycle()
             if (snapshot.packageName !in enabledPackages) return
             val result = detector.execute(snapshot)
-            if (result.shouldBlock) maybeBlock(result.action)
+            if (result.shouldBlock) maybeBlock(result.action, snapshot.packageName)
         } catch (e: Exception) {
             android.util.Log.e("MindGuard", "watchdog error: ${e.message}")
         }

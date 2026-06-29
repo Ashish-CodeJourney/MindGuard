@@ -58,6 +58,15 @@ class MainViewModel(private val store: SettingsDataStore) : ViewModel() {
     val pauseUntil: StateFlow<Long> = store.pauseUntilFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
 
+    val instagramBlocks: StateFlow<Long> = store.instagramBlocksFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+    val youtubeBlocks: StateFlow<Long> = store.youtubeBlocksFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+    val tiktokBlocks: StateFlow<Long> = store.tiktokBlocksFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+    val snapchatBlocks: StateFlow<Long> = store.snapchatBlocksFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
+
     init {
         viewModelScope.launch { store.resetDailyCountsIfNeeded() }
     }

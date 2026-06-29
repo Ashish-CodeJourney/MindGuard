@@ -49,6 +49,12 @@ class SettingsDataStore(private val context: Context) {
         private val FOCUS_START_HOUR      = intPreferencesKey("focus_start_hour")
         private val FOCUS_END_HOUR        = intPreferencesKey("focus_end_hour")
 
+        // Per-app block counters (all-time)
+        private val INSTAGRAM_BLOCKS      = longPreferencesKey("instagram_blocks")
+        private val YOUTUBE_BLOCKS        = longPreferencesKey("youtube_blocks")
+        private val TIKTOK_BLOCKS         = longPreferencesKey("tiktok_blocks")
+        private val SNAPCHAT_BLOCKS       = longPreferencesKey("snapchat_blocks")
+
         // Pause-until epoch millis (0 = not paused)
         private val PAUSE_UNTIL_MS        = longPreferencesKey("pause_until_ms")
 
@@ -85,6 +91,12 @@ class SettingsDataStore(private val context: Context) {
     val focusScheduleEnabledFlow: Flow<Boolean> = context.dataStore.data.map { it[FOCUS_SCHEDULE_ON] ?: false }
     val focusStartHourFlow: Flow<Int>            = context.dataStore.data.map { it[FOCUS_START_HOUR] ?: 9 }
     val focusEndHourFlow: Flow<Int>              = context.dataStore.data.map { it[FOCUS_END_HOUR] ?: 17 }
+
+    // ── Per-app block flows ───────────────────────────────────────────────────
+    val instagramBlocksFlow: Flow<Long> = context.dataStore.data.map { it[INSTAGRAM_BLOCKS] ?: 0L }
+    val youtubeBlocksFlow:   Flow<Long> = context.dataStore.data.map { it[YOUTUBE_BLOCKS]   ?: 0L }
+    val tiktokBlocksFlow:    Flow<Long> = context.dataStore.data.map { it[TIKTOK_BLOCKS]    ?: 0L }
+    val snapchatBlocksFlow:  Flow<Long> = context.dataStore.data.map { it[SNAPCHAT_BLOCKS]  ?: 0L }
 
     // ── Pause-until flow ─────────────────────────────────────────────────────
     val pauseUntilFlow: Flow<Long> = context.dataStore.data.map { it[PAUSE_UNTIL_MS] ?: 0L }
@@ -153,10 +165,17 @@ class SettingsDataStore(private val context: Context) {
         }
     }
 
-    suspend fun recordBlock() {
+    suspend fun recordBlock(packageName: String = "") {
         context.dataStore.edit {
             it[BLOCK_COUNT_TODAY] = (it[BLOCK_COUNT_TODAY] ?: 0L) + 1
             it[TOTAL_BLOCKS]      = (it[TOTAL_BLOCKS] ?: 0L) + 1
+            when (packageName) {
+                INSTAGRAM_PKG               -> it[INSTAGRAM_BLOCKS] = (it[INSTAGRAM_BLOCKS] ?: 0L) + 1
+                YOUTUBE_PKG                 -> it[YOUTUBE_BLOCKS]   = (it[YOUTUBE_BLOCKS]   ?: 0L) + 1
+                TIKTOK_PKG, TIKTOK_PKG2,
+                TIKTOK_PKG3                 -> it[TIKTOK_BLOCKS]    = (it[TIKTOK_BLOCKS]    ?: 0L) + 1
+                SNAPCHAT_PKG                -> it[SNAPCHAT_BLOCKS]  = (it[SNAPCHAT_BLOCKS]  ?: 0L) + 1
+            }
         }
     }
 

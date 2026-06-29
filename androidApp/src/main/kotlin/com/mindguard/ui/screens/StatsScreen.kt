@@ -1,14 +1,21 @@
 package com.mindguard.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,6 +35,10 @@ fun StatsScreen(
     totalAttempts: Long,
     currentStreak: Long,
     bestStreak: Long,
+    instagramBlocks: Long = 0L,
+    youtubeBlocks: Long = 0L,
+    tiktokBlocks: Long = 0L,
+    snapchatBlocks: Long = 0L,
     onBack: () -> Unit
 ) {
     var showToday by remember { mutableStateOf(true) }
@@ -37,10 +48,19 @@ fun StatsScreen(
     val deflPct  = if (attempts > 0) (blocks * 100 / attempts) else 0L
     val blockRate = if (attempts > 0) blocks.toFloat() / attempts else 0f
 
+    val appData = listOf(
+        AppStat("Instagram", instagramBlocks, Color(0xFFE1306C)),
+        AppStat("YouTube",   youtubeBlocks,   Color(0xFFFF0000)),
+        AppStat("TikTok",    tiktokBlocks,    Color(0xFF444444)),
+        AppStat("Snapchat",  snapchatBlocks,  Color(0xFFFFCC00))
+    )
+    val totalAppBlocks = appData.sumOf { it.count }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF4F3FF))
+            .verticalScroll(rememberScrollState())
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -59,7 +79,6 @@ fun StatsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Tab switcher
         Row(
             modifier = Modifier
                 .background(Color(0xFFE8E6FF), RoundedCornerShape(50))
@@ -88,7 +107,6 @@ fun StatsScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Hero card — time saved
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
@@ -107,26 +125,24 @@ fun StatsScreen(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Text("~90s per reel blocked", fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f))
+                Text("~90s per video blocked", fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f))
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2×2 detail cards
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            DetailCard("🚫", "Reels Blocked",    blocks.toString(),   Modifier.weight(1f))
-            DetailCard("👀", "Attempts",          attempts.toString(), Modifier.weight(1f))
+            DetailCard("🚫", "Videos Blocked",  blocks.toString(),   Modifier.weight(1f))
+            DetailCard("👀", "Attempts",         attempts.toString(), Modifier.weight(1f))
         }
         Spacer(modifier = Modifier.height(12.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            DetailCard("🎯", "Deflected",         "$deflPct%",         Modifier.weight(1f))
-            DetailCard("😬", "Slipped Through",   slipped.toString(),  Modifier.weight(1f))
+            DetailCard("🎯", "Deflected",        "$deflPct%",         Modifier.weight(1f))
+            DetailCard("😬", "Slipped Through",  slipped.toString(),  Modifier.weight(1f))
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Block rate bar
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -148,7 +164,93 @@ fun StatsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Streak card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp)
+            ) {
+                Text(
+                    "App Breakdown",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A1A2E)
+                )
+                Text(
+                    "All-time distribution",
+                    fontSize = 12.sp,
+                    color = Color(0xFF888888)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                if (totalAppBlocks == 0L) {
+                    Text(
+                        "No blocks recorded yet — the chart will appear once you get started!",
+                        fontSize = 14.sp,
+                        color = Color(0xFF888888),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 24.dp)
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AppPieChart(
+                            data = appData,
+                            total = totalAppBlocks,
+                            modifier = Modifier.size(130.dp)
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            appData.filter { it.count > 0 }.forEach { app ->
+                                val pct = (app.count * 100 / totalAppBlocks).toInt()
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(10.dp)
+                                            .background(app.color, CircleShape)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            app.name,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color(0xFF1A1A2E)
+                                        )
+                                        Text(
+                                            "${app.count} blocks · $pct%",
+                                            fontSize = 11.sp,
+                                            color = Color(0xFF888888)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    appData.forEach { app ->
+                        AppChip(app = app, modifier = Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -173,6 +275,77 @@ fun StatsScreen(
                     Text("Best streak", fontSize = 11.sp, color = Color(0xFF888888))
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+private data class AppStat(val name: String, val count: Long, val color: Color)
+
+@Composable
+private fun AppPieChart(data: List<AppStat>, total: Long, modifier: Modifier = Modifier) {
+    Canvas(modifier = modifier) {
+        val strokeWidth = size.width * 0.2f
+        val radius = (size.minDimension - strokeWidth) / 2f
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val topLeft = Offset(center.x - radius, center.y - radius)
+        val arcSize = Size(radius * 2f, radius * 2f)
+
+        var startAngle = -90f
+        val gap = 3f
+
+        data.filter { it.count > 0 }.forEach { app ->
+            val sweep = (app.count.toFloat() / total.toFloat()) * 360f - gap
+            drawArc(
+                color = app.color,
+                startAngle = startAngle,
+                sweepAngle = sweep.coerceAtLeast(0f),
+                useCenter = false,
+                topLeft = topLeft,
+                size = arcSize,
+                style = Stroke(width = strokeWidth)
+            )
+            startAngle += sweep + gap
+        }
+    }
+}
+
+@Composable
+private fun AppChip(app: AppStat, modifier: Modifier = Modifier) {
+    val emoji = when (app.name) {
+        "Instagram" -> "📸"
+        "YouTube"   -> "▶️"
+        "TikTok"    -> "🎵"
+        "Snapchat"  -> "👻"
+        else        -> "📱"
+    }
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = app.color.copy(alpha = 0.1f))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(emoji, fontSize = 18.sp)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                app.count.toString(),
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A1A2E)
+            )
+            Text(
+                app.name,
+                fontSize = 9.sp,
+                color = Color(0xFF888888),
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
     }
 }
