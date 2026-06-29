@@ -136,6 +136,20 @@ class ScreenSnapshotTest {
     }
 
     @Test
+    fun windowClassNameIsPreservedWhenCopyingWithNewResourceIds() {
+        val original = ScreenSnapshot(
+            packageName = "com.instagram.android",
+            screenText = emptyList(),
+            contentDescriptions = emptyList(),
+            resourceIds = emptyList(),
+            timestampMillis = 1000L,
+            windowClassName = "com.instagram.android.clips.fragment.ClipsViewerFragment"
+        )
+        val augmented = original.copy(resourceIds = listOf("com.instagram.android:id/reel_pager"))
+        assertEquals("com.instagram.android.clips.fragment.ClipsViewerFragment", augmented.windowClassName)
+    }
+
+    @Test
     fun storesBlankWindowClassNameAsIs() {
         val snapshot = ScreenSnapshot(
             packageName = "com.instagram.android",
