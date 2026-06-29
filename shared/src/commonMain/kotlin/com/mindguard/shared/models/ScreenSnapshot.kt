@@ -5,7 +5,8 @@ data class ScreenSnapshot(
     val screenText: List<String>,
     val contentDescriptions: List<String>,
     val resourceIds: List<String>,
-    val timestampMillis: Long
+    val timestampMillis: Long,
+    val windowClassName: String? = null
 ) {
     init {
         require(packageName.isNotBlank()) { "packageName must not be blank" }
