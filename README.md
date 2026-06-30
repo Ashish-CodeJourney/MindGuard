@@ -252,6 +252,5 @@ MIT — see [LICENSE](LICENSE)
 
 ## Questions?
 
-- 💬 GitHub [Discussions](https://github.com/Ashish-CodeJourney/MindGuard/discussions)
 - 🐛 Found a bug? [Issues](https://github.com/Ashish-CodeJourney/MindGuard/issues)
 - 🤝 Want to contribute? PRs welcome!
