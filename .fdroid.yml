@@ -1,8 +1,67 @@
 ---
-builds:
+Categories:
+  - Time
+License: MIT
+AuthorName: Ashish Vaghela
+WebSite: https://ashish-codejourney.github.io/MindGuard/
+SourceCode: https://github.com/Ashish-CodeJourney/MindGuard
+IssueTracker: https://github.com/Ashish-CodeJourney/MindGuard/issues
+Changelog: https://github.com/Ashish-CodeJourney/MindGuard/releases
+
+Summary: Block short-form video feeds on-device with no data collection
+Description: |
+  Reclaim your attention. MindGuard is a privacy-first Android app that
+  automatically detects and blocks short-form video feeds — Instagram Reels,
+  YouTube Shorts, TikTok, and Snapchat Spotlight — entirely on-device.
+
+  FEATURES
+
+  * Reel / Shorts / Spotlight blocking for Instagram, YouTube, TikTok, and Snapchat
+  * Per-app toggles to enable or disable blocking per app
+  * Focus schedule with configurable hours (supports overnight ranges)
+  * Pause focus mode for 30 minutes from the app or notification shade
+  * Quick Settings tile for tap-to-toggle without opening the app
+  * Daily and all-time statistics (blocks, attempts, streaks)
+  * 100% on-device — no accounts, no cloud, no tracking
+
+  HOW IT WORKS
+
+  MindGuard uses Android's Accessibility Service to inspect UI events only
+  from the target apps. When the short-video player is detected on screen,
+  the service navigates away automatically before you can get drawn in.
+
+  PRIVACY
+
+  * All detection runs entirely on-device
+  * No network requests
+  * No user accounts or sign-in
+  * Service scope restricted to Instagram, YouTube, TikTok, and Snapchat
+  * No data is collected, stored remotely, or transmitted
+  .
+
+CurrentVersion: "0.2.0"
+CurrentVersionCode: 2
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+
+RepoType: git
+Repo: https://github.com/Ashish-CodeJourney/MindGuard.git
+
+Builds:
   - versionName: "0.1.0"
     versionCode: 1
-    commit: "HEAD"
+    commit: v0.1.0
+    gradle:
+      - yes
+    scanignore:
+      - androidApp/build.gradle.kts
+    srclibs:
+      - kotlin-gradle-plugin@v1.9.22
+    prebuild: mkdir -p "$$SDK/ndk/26.1.10909125" && touch "$$SDK/ndk/26.1.10909125/source.properties"
+
+  - versionName: "0.2.0"
+    versionCode: 2
+    commit: v0.2.0
     gradle:
       - yes
     scanignore:
