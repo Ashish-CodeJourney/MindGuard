@@ -1,0 +1,10 @@
+<svg width="108" height="108" viewBox="0 0 108 108" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="108" height="108" rx="24" fill="url(#ng)"/>
+  <path d="M54 14L22 28V58C22 78 36 92 54 96C72 92 86 78 86 58V28Z" fill="white"/>
+  <path d="M30 56L40 56L45 40L54 72L59 46L64 56L78 56" stroke="#4A1970" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="ng" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF3B5C"/><stop offset="1" stop-color="#4A1970"/>
+    </linearGradient>
+  </defs>
+</svg>
