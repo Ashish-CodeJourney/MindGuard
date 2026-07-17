@@ -1,4 +1,4 @@
-# 🛡️ MindGuard
+# <img src="docs/favicon.svg" width="32" height="32" alt="MindGuard logo" valign="middle"> MindGuard
 
 **Reclaim your attention. Block Instagram Reels, YouTube Shorts, TikTok, and Snapchat Spotlight — entirely on your phone.**
 
