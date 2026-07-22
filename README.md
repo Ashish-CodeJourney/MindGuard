@@ -250,6 +250,14 @@ MIT — see [LICENSE](LICENSE)
 
 ---
 
+## Sponsor
+
+MindGuard isn't on the Play Store yet. Getting there costs money: the $25 Google Play developer registration fee, plus ongoing device testing across Android versions — all with no ads, no analytics, no accounts, no servers, so no revenue to cover it.
+
+If you want MindGuard on the Play Store, [sponsoring](https://github.com/sponsors/Ashish-CodeJourney) helps get it published — and keeps it free and maintained after.
+
+---
+
 ## Questions?
 
 - 🐛 Found a bug? [Issues](https://github.com/Ashish-CodeJourney/MindGuard/issues)
