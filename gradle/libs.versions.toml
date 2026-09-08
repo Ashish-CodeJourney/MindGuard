@@ -8,7 +8,7 @@ androidx-datastore = "1.0.0"
 junit = "4.13.2"
 turbine = "1.0.0"
 koin = "3.5.3"
-sqldelight = "2.0.1"
+sqldelight = "2.3.2"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
