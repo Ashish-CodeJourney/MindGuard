@@ -1,0 +1,44 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0B0B10"/>
+  
+  <!-- Gradient orbs -->
+  <ellipse cx="200" cy="180" rx="300" ry="200" fill="rgba(255,59,92,0.12)"/>
+  <ellipse cx="1000" cy="500" rx="250" ry="180" fill="rgba(45,212,191,0.08)"/>
+  
+  <!-- Shield logo (left side) -->
+  <g transform="translate(80, 180) scale(1.8)">
+    <rect width="108" height="108" rx="24" fill="url(#og-ng)"/>
+    <path d="M54 14L22 28V58C22 78 36 92 54 96C72 92 86 78 86 58V28Z" fill="white"/>
+    <path d="M30 56L40 56L45 40L54 72L59 46L64 56L78 56" stroke="#4A1970" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <defs>
+      <linearGradient id="og-ng" x1="0" y1="0" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#FF3B5C"/>
+        <stop offset="1" stop-color="#4A1970"/>
+      </linearGradient>
+    </defs>
+  </g>
+  
+  <!-- Text content -->
+  <text x="340" y="260" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="58" fill="white" letter-spacing="-1">MindGuard</text>
+  
+  <text x="340" y="330" font-family="system-ui, -apple-system, sans-serif" font-weight="400" font-size="30" fill="white" opacity="0.7">Stop the scroll before it stops you.</text>
+  
+  <!-- Feature pills -->
+  <g transform="translate(340, 380)">
+    <rect width="160" height="38" rx="19" fill="rgba(255,59,92,0.18)"/>
+    <text x="80" y="25" font-family="system-ui, -apple-system, sans-serif" font-weight="500" font-size="14" fill="#FF3B5C" text-anchor="middle" letter-spacing="0.5">100% ON-DEVICE</text>
+  </g>
+  <g transform="translate(520, 380)">
+    <rect width="140" height="38" rx="19" fill="rgba(45,212,191,0.15)"/>
+    <text x="70" y="25" font-family="system-ui, -apple-system, sans-serif" font-weight="500" font-size="14" fill="#2DD4BF" text-anchor="middle" letter-spacing="0.5">OPEN SOURCE</text>
+  </g>
+  <g transform="translate(680, 380)">
+    <rect width="90" height="38" rx="19" fill="rgba(255,255,255,0.08)"/>
+    <text x="45" y="25" font-family="system-ui, -apple-system, sans-serif" font-weight="500" font-size="14" fill="rgba(255,255,255,0.6)" text-anchor="middle" letter-spacing="0.5">FREE</text>
+  </g>
+  
+  <!-- Bottom bar -->
+  <rect x="0" y="590" width="1200" height="40" fill="rgba(255,255,255,0.03)"/>
+  <text x="600" y="616" font-family="monospace" font-size="14" fill="rgba(255,255,255,0.35)" text-anchor="middle" letter-spacing="1">mindguard.eu.org</text>
+</svg>
